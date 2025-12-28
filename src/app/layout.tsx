@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Kairi Kana",
   description: "Official website of Kairi Kana",
+  verification: {
+    google: "H5cz5oFhs_BCNCnr4taXOoM-W8L-KMn3zqQ5QUZtd-U",
+  },
 };
 
 export default function RootLayout({
