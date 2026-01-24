@@ -1,5 +1,7 @@
 "use client";
 
+import { supabase } from '@/lib/supabaseClient';
+
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,9 +29,27 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) setSubmitted(true);
+    console.log('Attempting to submit email:', email);
+
+    if (!email) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('whitelist')
+        .insert([{ email }]);
+
+      if (error) {
+        console.error('❌ Supabase Error:', error.message);
+        alert('Failed to save email. Check console for details.');
+      } else {
+        console.log('✅ Email saved to Supabase:', data);
+        setSubmitted(true);
+      }
+    } catch (err) {
+      console.error('❌ Unexpected Error:', err);
+    }
   };
 
   const KairiLogo = () => (
