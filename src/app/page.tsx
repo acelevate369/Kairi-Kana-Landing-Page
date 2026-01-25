@@ -18,6 +18,15 @@ import {
 } from 'lucide-react';
 import KairiLogoImg from './Logo_Kairi_Kana.png';
 
+const KairiLogo = () => (
+  <motion.div
+    animate={{ rotate: [0, 10, -10, 0] }}
+    transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+  >
+    <Image src={KairiLogoImg} alt="Kairi Kana Logo" width={32} height={32} />
+  </motion.div>
+);
+
 const App = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -45,21 +54,26 @@ const App = () => {
         alert('Failed to save email. Check console for details.');
       } else {
         console.log('✅ Email saved to Supabase:', data);
+
+        // Trigger n8n Webhook
+        try {
+          console.log('🚀 Triggering n8n webhook...');
+          await fetch('https://omegaarch.taila8068d.ts.net/webhook/aa9c0f66-344c-478e-8d65-6178c93b17f8', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+          console.log('✅ n8n Webhook triggered successfully');
+        } catch (webhookError) {
+          console.error('⚠️ Failed to trigger n8n webhook:', webhookError);
+        }
+
         setSubmitted(true);
       }
     } catch (err) {
       console.error('❌ Unexpected Error:', err);
     }
   };
-
-  const KairiLogo = () => (
-    <motion.div
-      animate={{ rotate: [0, 10, -10, 0] }}
-      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-    >
-      <Image src={KairiLogoImg} alt="Kairi Kana Logo" width={32} height={32} />
-    </motion.div>
-  );
 
   const pricingTiers = [
     {
