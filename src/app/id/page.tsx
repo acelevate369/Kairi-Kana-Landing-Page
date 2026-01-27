@@ -1,0 +1,583 @@
+"use client";
+
+import { supabase } from '@/lib/supabaseClient';
+
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Zap,
+    Check,
+    Cpu,
+    User,
+    MousePointer2,
+    Ghost,
+    Camera,
+    FileText,
+    TrendingUp
+} from 'lucide-react';
+import KairiLogoImg from '../Logo_Kairi_Kana.png';
+
+const KairiLogo = () => (
+    <motion.div
+        animate={{ rotate: [0, 10, -10, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+    >
+        <Image src={KairiLogoImg} alt="Kairi Kana Logo" width={32} height={32} />
+    </motion.div>
+);
+
+const App = () => {
+    const [email, setEmail] = useState('');
+    const [submitted, setSubmitted] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 50);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log('Attempting to submit email:', email);
+
+        if (!email) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('whitelist')
+                .insert([{ email }]);
+
+            if (error) {
+                console.error('❌ Supabase Error:', error.message);
+                alert('Gagal menyimpan email. Cek console untuk detailnya.');
+            } else {
+                console.log('✅ Email saved to Supabase:', data);
+
+                // Trigger n8n Webhook
+                try {
+                    console.log('🚀 Triggering n8n webhook...');
+                    await fetch('https://omegaarch.taila8068d.ts.net/webhook/aa9c0f66-344c-478e-8d65-6178c93b17f8', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email }),
+                    });
+                    console.log('✅ n8n Webhook triggered successfully');
+                } catch (webhookError) {
+                    console.error('⚠️ Failed to trigger n8n webhook:', webhookError);
+                }
+
+                setSubmitted(true);
+            }
+        } catch (err) {
+            console.error('❌ Unexpected Error:', err);
+        }
+    };
+
+    const pricingTiers = [
+        {
+            id: 'T1',
+            name: 'Shoshin',
+            price: 'Rp 49.000',
+            status: 'Live',
+            color: 'from-pink-500/20',
+            sellingPoint: 'Hapus admin manualmu. Cukup foto dan chat.',
+            features: [
+                'Visi Multimodal: Ubah foto papan tulis, struk, atau catatan jadi data digital.',
+                'Loop Tugas & Kebiasaan: Manajemen tugas standar dengan pelacakan kebiasaan cerdas & poin XP.',
+                'Penjadwalan Cerdas: Beri tahu Kairi slot kosongmu, dan dia akan petakan tugasmu secara otomatis.',
+                'Akses Asisten WhatsApp yang Disederhanakan'
+            ],
+            popular: true
+        },
+        {
+            id: 'T2',
+            name: 'Sensei',
+            price: 'Segera Hadir',
+            status: 'Waitlist',
+            color: 'from-purple-500/20',
+            sellingPoint: 'Asisten riset dan pelatih kehidupanmu dalam satu chat.',
+            features: [
+                'Analisis PDF/Dokumen (RAG): Unggah PDF dan ajukan pertanyaan atau minta ringkasan.',
+                'Tantangan: Tugas mini harian berdasarkan kebiasaanmu agar kamu tetap disiplin.',
+                'Jurnal Mendalam: Interaksi AI reflektif yang bertindak sebagai pelatih kehidupan pribadimu.',
+                'Konteks Memori Diperluas'
+            ],
+
+        },
+        {
+            id: 'T3',
+            name: 'Ethereal',
+            price: 'Segera Hadir',
+            status: 'Waitlist',
+            color: 'from-blue-500/20',
+            sellingPoint: 'Arsitek masa depanmu. Ubah data menjadi kesuksesan.',
+            features: [
+                'Proyeksi Diri Masa Depan: Proyeksi berbasis data tentang pola hidupmu 5 tahun ke depan.',
+                'Jenius Finansial: Audit mendalam, simulasi investasi, dan deteksi kebocoran.',
+                'Jalur Pembelajaran Terintegrasi: Kurikulum pembelajaran khusus yang dibuat otomatis untukmu.',
+                'Akses Model SOTA Murni Tanpa Kuantisasi'
+            ]
+        },
+        {
+            id: 'T0',
+            name: 'The Creator',
+            price: 'Segera Hadir',
+            status: 'Waitlist',
+            color: 'from-slate-500/20',
+            sellingPoint: 'Kedaulatan utama bagi pionir digital.',
+            features: [
+                'Infrastruktur AI yang Benar-benar Dipesan Lebih Dahulu',
+                'Server Dedikasi Pribadi',
+                'Fine-tuning pada basis pengetahuan pribadimu yang spesifik',
+                'Akses Prioritas 24/7 ke Lab Ace Elevate'
+            ],
+            special: true
+        }
+    ];
+
+    const fadeUp = {
+        hidden: { opacity: 0, y: 30 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" as const } }
+    };
+
+    const staggerContainer = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+    };
+
+    return (
+        <div className="min-h-screen bg-[#01040D] text-slate-200 font-sans selection:bg-pink-500/30 overflow-x-hidden">
+
+            {/* Background Ambience */}
+            <div className="fixed inset-0 overflow-hidden -z-10">
+                <motion.div
+                    animate={{ x: [0, 50, 0], y: [0, 30, 0], scale: [1, 1.1, 1] }}
+                    transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-purple-600/10 blur-[150px] rounded-full"
+                />
+                <motion.div
+                    animate={{ x: [0, -40, 0], y: [0, 50, 0], scale: [1, 1.2, 1] }}
+                    transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full"
+                />
+            </div>
+
+            {/* Navbar */}
+            <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[#01040D]/90 backdrop-blur-2xl py-4 border-b border-white/5' : 'bg-transparent py-8'}`}>
+                <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center space-x-3 cursor-pointer group"
+                    >
+                        <KairiLogo />
+                        <div className="flex flex-col">
+                            <span className="text-xl font-black tracking-tighter text-white leading-none italic uppercase group-hover:text-pink-400 transition">KAIRI KANA</span>
+                            <span className="text-[9px] font-bold tracking-[0.3em] text-pink-500/80 uppercase">Ace Elevate Startup</span>
+                        </div>
+                    </motion.div>
+                    <div className="hidden md:flex items-center space-x-12 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        {['konsep', 'teknologi', 'harga'].map((item) => (
+                            <a key={item} href={`#${item}`} className="hover:text-pink-400 transition-colors duration-300 relative group py-2">
+                                {item}
+                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+                            </a>
+                        ))}
+                        {/* Language Switcher */}
+                        <div className="flex items-center space-x-2 border-l border-white/10 pl-6 ml-6">
+                            <a href="/" className="hover:text-white transition-colors">En</a>
+                            <span className="text-white/20">|</span>
+                            <span className="text-pink-500 font-bold">Id</span>
+                        </div>
+                    </div>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+                        className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 rounded-full font-bold text-[10px] tracking-widest shadow-lg shadow-pink-500/20"
+                    >
+                        GABUNG WAITLIST
+                    </motion.button>
+                </div>
+            </nav>
+
+            {/* Hero Section */}
+            <section className="relative pt-48 lg:pt-64 pb-32 px-6">
+                <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-24">
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={staggerContainer}
+                        className="lg:w-3/5 text-center lg:text-left"
+                    >
+                        <motion.div variants={fadeUp} className="inline-flex items-center space-x-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-8">
+                            <Ghost size={14} className="text-pink-500 animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Dibuat untuk digital native</span>
+                        </motion.div>
+
+                        <motion.div variants={fadeUp} className="mb-8">
+                            <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi Kana</p>
+                            <h1 className="text-6xl lg:text-[8rem] font-black text-white leading-[0.85] tracking-tighter uppercase italic">
+                                Kill the <br />
+                                <motion.span
+                                    animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
+                                    transition={{ duration: 10, repeat: Infinity }}
+                                    className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 bg-[length:200%_auto]"
+                                >
+                                    Chaos.
+                                </motion.span>
+                            </h1>
+                        </motion.div>
+
+                        <motion.p variants={fadeUp} className="text-xl text-slate-400 max-w-xl mb-12 leading-relaxed font-medium">
+                            Kamu tidak butuh aplikasi rumit lainnya. Kamu butuh asisten yang hidup di tempatmu berada. Foto duniamu dan biarkan Kairi mengatur hidupmu.
+                        </motion.p>
+
+                        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-10">
+                            <button
+                                onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+                                className="w-full sm:w-auto px-12 py-6 bg-white text-black rounded-2xl font-black text-xl hover:bg-pink-500 hover:text-white transition-all shadow-2xl hover:shadow-pink-500/20 active:scale-95 duration-300 italic"
+                            >
+                                Mulai Shoshin — Rp 49rb
+                            </button>
+                            <div className="flex items-center gap-3">
+                                <MousePointer2 size={16} className="text-blue-400" />
+                                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">500+ di era flow</span>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+
+                    {/* Chat Mockup */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 1.2, ease: "easeOut" }}
+                        className="lg:w-2/5 w-full perspective-1000"
+                    >
+                        <div className="relative group">
+                            <div className="absolute -inset-10 bg-gradient-to-tr from-pink-500/20 via-purple-500/20 to-blue-500/20 blur-[100px] opacity-40 group-hover:opacity-100 transition duration-1000"></div>
+                            <motion.div
+                                animate={{ y: [0, -15, 0] }}
+                                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                                className="bg-[#0F172A]/80 backdrop-blur-xl border border-white/10 rounded-[4rem] p-5 shadow-2xl relative overflow-hidden"
+                            >
+                                <div className="bg-[#020617] rounded-[3rem] h-[550px] flex flex-col overflow-hidden">
+                                    <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-blue-500 p-[1.5px]">
+                                                <div className="w-full h-full rounded-full bg-[#020617] flex items-center justify-center"><KairiLogo /></div>
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-bold text-white tracking-tight leading-none mb-1">Kairi Kana</p>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-pulse"></span>
+                                                    <span className="text-[10px] text-pink-400 font-bold uppercase tracking-widest">Online</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 p-6 space-y-6 overflow-y-auto">
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 1 }}
+                                            className="ml-auto bg-purple-600/30 border border-purple-500/20 p-4 rounded-3xl rounded-tr-none text-sm text-slate-200 max-w-[90%] shadow-lg shadow-purple-900/10"
+                                        >
+                                            &quot;Hai Kairi, ingatkan aku untuk menyelesaikan presentasi proyek Ace Elevate sebelum jam 9 malam ini.&quot;
+                                        </motion.div>
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: 2.5 }}
+                                            className="mr-auto bg-white/5 border border-white/5 p-4 rounded-3xl rounded-tl-none text-sm text-slate-300 max-w-[90%] relative"
+                                        >
+                                            <p className="text-blue-400 font-black text-[9px] uppercase tracking-widest mb-2">Kairi AI</p>
+                                            Siap! 🚀 Pengingat sudah diatur jam 9 malam. Tetap fokus, kamu pasti bisa!
+                                        </motion.div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* The Anti-App Experience Section */}
+            <section id="konsep" className="py-32 px-6 relative">
+                <div className="max-w-7xl mx-auto">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                        className="text-center mb-24"
+                    >
+                        <motion.h2 variants={fadeUp} className="text-5xl lg:text-8xl font-black text-white mb-6 uppercase italic tracking-tighter">The Anti-App</motion.h2>
+                        <motion.p variants={fadeUp} className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs underline decoration-pink-500/50 underline-offset-8">Tanpa UI, Tanpa Kelelahan, Tanpa Gesekan</motion.p>
+                    </motion.div>
+
+                    <div className="grid md:grid-cols-3 gap-8 text-center lg:text-left">
+                        {[
+                            {
+                                icon: <Camera className="text-pink-500" />,
+                                title: "Mode Visi",
+                                desc: "Foto papan tulis atau strukmu. Kairi membaca, memahami, dan mencatatnya secara instan. Tanpa ketik manual."
+                            },
+                            {
+                                icon: <TrendingUp className="text-purple-500" />,
+                                title: "Alur Tergamifikasi",
+                                desc: "Ubah hidupmu menjadi game. Dapatkan XP untuk setiap kebiasaan yang kamu pertahankan dan tugas yang kamu selesaikan tanpa membuka dashboard."
+                            },
+                            {
+                                icon: <FileText className="text-blue-500" />,
+                                title: "Lab Riset",
+                                desc: "Unggah makalah PDF. Minta Kairi untuk meringkas jurnal atau mengujimu langsung di dalam chat."
+                            }
+                        ].map((f, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.2 }}
+                                whileHover={{ y: -10 }}
+                                className="p-10 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.05] transition-all relative overflow-hidden group"
+                            >
+                                <div className="mb-8">{f.icon}</div>
+                                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{f.title}</h3>
+                                <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* M-MCP Technology Section */}
+            <section id="teknologi" className="py-32 px-6">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    className="max-w-7xl mx-auto rounded-[5rem] bg-gradient-to-br from-slate-900 via-black to-slate-900 p-12 lg:p-24 border border-white/5 relative overflow-hidden shadow-2xl"
+                >
+                    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/10 blur-[120px] rounded-full"></div>
+                    <div className="flex flex-col lg:flex-row gap-20 items-center">
+                        <div className="lg:w-1/2">
+                            <div className="flex items-center gap-3 mb-8">
+                                <Cpu size={20} className="text-blue-400" />
+                                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-600 italic">Teknologi Ace Elevate</span>
+                            </div>
+                            <h2 className="text-4xl lg:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.9] italic">
+                                Pemrosesan <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 bg-[length:200%_auto]">M-MCP</span>
+                            </h2>
+                            <p className="text-lg text-slate-400 leading-relaxed mb-10">
+                                Kairi Kana bukan sekadar chatbot. Ini adalah Mesin Konteks Multi-Model. Kami memverifikasi silang setiap snapshot dan pesan di berbagai model AI berbeda untuk memastikan nol halusinasi dan akurasi alur 100%.
+                            </p>
+                            <div className="flex gap-10">
+                                <div><p className="text-3xl font-black text-white italic">99.8%</p><p className="text-[9px] font-bold text-slate-600 uppercase">Akurasi</p></div>
+                                <div><p className="text-3xl font-black text-white italic">&lt; 1.5s</p><p className="text-[9px] font-bold text-slate-600 uppercase">Latensi</p></div>
+                            </div>
+                        </div>
+                        <div className="lg:w-1/2 space-y-6">
+                            {[
+                                { title: "Nol Halusinasi", desc: "Verifikasi model ganda memastikan catatan selalu berdasarkan fakta.", color: "pink" },
+                                { title: "Logika Cerdas", desc: "Retensi konteks mirip manusia yang memahami input berantakan dan catatan suara.", color: "blue" }
+                            ].map((box, i) => (
+                                <motion.div
+                                    key={i}
+                                    whileHover={{ scale: 1.02, x: 10 }}
+                                    className="p-8 bg-white/5 rounded-3xl border border-white/10 shadow-lg"
+                                >
+                                    <p className={`text-[10px] font-black uppercase tracking-widest text-${box.color}-500 mb-2 italic`}>{box.title}</p>
+                                    <p className="text-slate-400 text-sm italic font-medium">{box.desc}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </motion.div>
+            </section>
+
+            {/* Pricing Section */}
+            <section id="harga" className="py-32 px-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-24">
+                        <h2 className="text-5xl lg:text-9xl font-black text-white tracking-tighter uppercase italic leading-none mb-6">T-Series</h2>
+                        <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs underline decoration-purple-600">Strategi Akses Global</p>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {pricingTiers.map((tier, i) => (
+                            <motion.div
+                                key={tier.id}
+                                initial={{ opacity: 0, y: 50 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1, duration: 0.8 }}
+                                whileHover={{ y: -15, scale: 1.02 }}
+                                className={`p-10 rounded-[4rem] flex flex-col border transition-all duration-500 relative group overflow-hidden ${tier.popular ? 'bg-gradient-to-b from-slate-900 to-black border-purple-500/40 shadow-2xl shadow-purple-500/10' : 'bg-white/[0.01] border-white/5'}`}
+                            >
+                                <div className={`absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b ${tier.color} to-transparent opacity-0 group-hover:opacity-100 transition duration-700`}></div>
+
+                                {tier.popular && (
+                                    <div className="relative z-10 mb-4 text-center">
+                                        <span className="inline-block px-5 py-1.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[8px] font-black uppercase tracking-[0.15em] rounded-full shadow-lg">Direkomendasikan</span>
+                                    </div>
+                                )}
+
+                                <div className="mb-10 relative z-10">
+                                    <span className="text-pink-500 font-black text-6xl italic tracking-tighter">{tier.id}</span>
+                                    <h3 className="text-2xl font-black text-white mt-2 uppercase tracking-tight italic leading-none">{tier.name}</h3>
+                                    <div className="mt-6 flex items-baseline gap-2">
+                                        <span className="text-5xl font-black text-white">{tier.price}</span>
+                                        {tier.price.includes('Rp') && <span className="text-slate-600 font-bold text-xs tracking-widest uppercase">/bln</span>}
+                                    </div>
+                                    <p className="text-[10px] text-pink-400 font-black uppercase tracking-widest mt-4 mb-2 italic">{tier.sellingPoint}</p>
+                                </div>
+
+                                <div className="flex-1 space-y-4 mb-12 relative z-10">
+                                    {tier.features.map((f, idx) => (
+                                        <div key={idx} className="flex items-start gap-3 text-[10px] text-slate-400 font-black uppercase tracking-tight leading-snug">
+                                            <div className="w-4 h-4 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0 mt-0.5">
+                                                <Check size={10} strokeWidth={4} />
+                                            </div>
+                                            <span>{f}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}>
+                                    {tier.status === 'Waitlist' ? 'Gabung Waitlist' : `Akses ${tier.name}`}
+                                </button>
+                            </motion.div>
+                        ))}
+                    </div>
+                    <div className="mt-12 text-center">
+                    </div>
+                </div>
+            </section>
+
+            {/* Ace Elevate Vision Section */}
+            <section id="vision" className="py-32 px-6">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    className="max-w-4xl mx-auto glass-card rounded-[5rem] p-12 lg:p-24 text-center border border-white/5 bg-white/[0.01] relative overflow-hidden shadow-2xl"
+                >
+                    <div className="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 transition group-hover:rotate-0"><Zap size={150} /></div>
+                    <div className="w-24 h-24 rounded-full bg-slate-900 border-2 border-white/10 flex items-center justify-center mx-auto mb-10 overflow-hidden grayscale">
+                        <User size={48} className="text-slate-600" />
+                    </div>
+                    <h2 className="text-3xl lg:text-5xl font-black text-white mb-8 tracking-tighter italic uppercase">Visi Ace Elevate</h2>
+                    <p className="text-xl text-slate-400 italic leading-relaxed max-w-2xl mx-auto mb-12 font-medium">
+                        &quot;Kita dijanjikan teknologi akan menyederhanakan hidup, tapi kita malah bekerja untuk aplikasi kita. Kairi Kana adalah Anti-App. Nol pengaturan, 100% flow. Dibangun bagi mereka yang punya dunia untuk dibangun, bukan pusat notifikasi untuk dikelola.&quot;
+                    </p>
+                    <div className="flex justify-center gap-10 opacity-30 grayscale text-[9px] font-black tracking-[0.4em] uppercase italic">
+                        <span>Innovation Lab</span>
+                        <span>Individual Startup</span>
+                        <span className="underline decoration-pink-500 underline-offset-4">Est. 2024</span>
+                    </div>
+                </motion.div>
+            </section>
+
+            {/* Final CTA */}
+            <section id="waitlist" className="py-48 px-6 relative text-center overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-t from-pink-500/10 to-transparent -z-10"></div>
+                <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="max-w-4xl mx-auto"
+                >
+                    <h2 className="text-6xl lg:text-[9rem] font-black text-white mb-10 tracking-tighter leading-[0.85] italic uppercase">
+                        Live in <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-600 to-blue-500">Flow.</span>
+                    </h2>
+                    <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Amankan slot tier Shoshin-mu seharga Rp 49.000/bulan. Undangan akses awal dikirim setiap hari.</p>
+
+                    <AnimatePresence mode='wait'>
+                        {!submitted ? (
+                            <motion.form
+                                key="form"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                onSubmit={handleSubmit}
+                                className="max-w-md mx-auto space-y-5"
+                            >
+                                <input
+                                    type="email"
+                                    placeholder="Masukkan email profesionalmu"
+                                    className="w-full px-10 py-7 rounded-3xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-pink-500/50 transition-all text-center text-xl font-black tracking-tighter"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                                <button className="group relative w-full py-7 bg-white text-black font-black text-2xl rounded-3xl hover:scale-[1.03] active:scale-95 transition-all shadow-2xl italic uppercase tracking-tighter overflow-hidden">
+                                    <span className="relative z-10">Secure Access</span>
+                                    <motion.div
+                                        initial={{ x: '-100%' }}
+                                        whileHover={{ x: '100%' }}
+                                        transition={{ duration: 0.5 }}
+                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/20 to-transparent -z-0"
+                                    />
+                                </button>
+                            </motion.form>
+                        ) : (
+                            <motion.div
+                                key="success"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="bg-white/5 border border-pink-500/30 p-16 rounded-[5rem] shadow-2xl shadow-pink-500/10"
+                            >
+                                <motion.div
+                                    initial={{ rotate: -10, scale: 0.5 }}
+                                    animate={{ rotate: 0, scale: 1 }}
+                                    transition={{ type: "spring", damping: 10 }}
+                                    className="w-20 h-20 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-8 text-white"
+                                >
+                                    <Check size={40} strokeWidth={4} />
+                                </motion.div>
+                                <h3 className="text-4xl font-black text-white mb-3 tracking-tight italic uppercase leading-none text-center">Slot Diamankan.</h3>
+                                <p className="text-slate-500 italic font-medium text-center">Ace Elevate akan segera menghubungimu. Bersiaplah untuk era flow.</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+            </section>
+
+            {/* Footer */}
+            <footer className="py-24 px-6 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
+                <div>
+                    <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
+                        <KairiLogo />
+                        <span className="font-black text-white tracking-tighter italic uppercase text-2xl">KAIRI KANA</span>
+                    </div>
+                    <span className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] italic leading-none">Ace Elevate Innovation Lab</span>
+                </div>
+                <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">
+                    <a href="#" className="hover:text-pink-500 transition-colors duration-300">Privasi</a>
+                    <a href="#" className="hover:text-purple-500 transition-colors duration-300">Syarat</a>
+                    <a href="#" className="hover:text-blue-500 transition-colors duration-300">Manifesto</a>
+                </div>
+                <div className="text-right">
+                    <p className="text-[9px] font-black text-slate-800 uppercase tracking-widest italic mb-2 leading-none">Dibangun untuk Era Gen-Z Global</p>
+                    <p className="text-[9px] font-bold text-slate-900 tracking-widest opacity-30 italic">© 2024 ACE ELEVATE GLOBAL.</p>
+                </div>
+            </footer>
+
+            <style jsx global>{`
+        .perspective-1000 { perspective: 1000px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #01040D; }
+        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF00FF; }
+        html { scroll-behavior: smooth; }
+      `}</style>
+        </div>
+    );
+};
+
+export default App;
