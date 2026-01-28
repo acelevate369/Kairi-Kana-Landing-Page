@@ -17,8 +17,12 @@ export default function JsonLd() {
         "operatingSystem": "Web, WhatsApp",
         "offers": {
             "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
+            "price": "3.00",
+            "priceCurrency": "USD",
+            "priceValidUntil": "2025-12-31",
+            "availability": "https://schema.org/OnlineOnly",
+            "url": "https://kairikana.vercel.app",
+            "category": "Subscription"
         },
         "creator": {
             "@type": "Organization",

@@ -19,6 +19,7 @@ import {
   Instagram
 } from 'lucide-react';
 import KairiLogoImg from './Logo_Kairi_Kana.png';
+import { SpotlightCard } from './components/SpotlightCard';
 
 const TikTokIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
@@ -312,7 +313,7 @@ const App = () => {
         </div>
       </section>
 
-      {/* The Anti-App Experience Section */}
+
       <section id="concept" className="py-32 px-6 relative">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -326,37 +327,56 @@ const App = () => {
             <motion.p variants={fadeUp} className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs underline decoration-pink-500/50 underline-offset-8">No UI, No Fatigue, No Friction</motion.p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 text-center lg:text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(0,1fr)]">
             {[
               {
-                icon: <Camera className="text-pink-500" />,
+                icon: <Camera className="text-pink-500" size={32} />,
                 title: "Vision Mode",
-                desc: "Snap a photo of the whiteboard or your receipts. Kairi reads, understands, and logs it instantly. No manual typing."
+                desc: "Snap a photo of the whiteboard or your receipts. Kairi reads, understands, and logs it instantly. No manual typing.",
+                className: "md:col-span-2 md:row-span-1 bg-white/[0.03] border-white/10"
               },
               {
-                icon: <TrendingUp className="text-purple-500" />,
+                icon: <TrendingUp className="text-purple-500" size={32} />,
                 title: "Gamified Flow",
-                desc: "Turn your life into a game. Earn XP for every habit you maintain and task you crush without opening a dashboard."
+                desc: "Turn your life into a game. Earn XP for every habit you maintain and task you crush without opening a dashboard.",
+                className: "md:col-span-1 md:row-span-2 bg-[#0F172A]/40 border-purple-500/20"
               },
               {
-                icon: <FileText className="text-blue-500" />,
+                icon: <FileText className="text-blue-500" size={32} />,
                 title: "Research Lab",
-                desc: "Upload PDF papers. Ask Kairi to summarize journals or quiz you directly in your chat."
+                desc: "Upload PDF papers. Ask Kairi to summarize journals or quiz you directly in your chat.",
+                className: "md:col-span-2 md:row-span-1 bg-blue-900/[0.1] border-blue-500/20"
               }
             ].map((f, i) => (
-              <motion.div
+              <SpotlightCard
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
-                whileHover={{ y: -10 }}
-                className="p-10 bg-white/[0.02] border border-white/5 rounded-[3rem] hover:bg-white/[0.05] transition-all relative overflow-hidden group"
+                className={`p-10 rounded-[3rem] border transition-all duration-300 group flex flex-col justify-between ${f.className}`}
+                spotlightColor={i === 1 ? "rgba(168, 85, 247, 0.25)" : i === 2 ? "rgba(59, 130, 246, 0.25)" : "rgba(236, 72, 153, 0.25)"}
               >
-                <div className="mb-8">{f.icon}</div>
-                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">{f.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{f.desc}</p>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.2 }}
+                >
+                  <div className="mb-6 p-4 bg-white/5 w-fit rounded-2xl backdrop-blur-sm">{f.icon}</div>
+                  <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">{f.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed font-medium">{f.desc}</p>
+                </motion.div>
+                {i === 1 && (
+                  <div className="mt-8 flex gap-2">
+                    <div className="h-2 w-full bg-purple-500/20 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: "70%" }}
+                        transition={{ duration: 1.5, delay: 0.5 }}
+                        className="h-full bg-purple-500"
+                      />
+                    </div>
+                    <span className="text-[10px] font-bold text-purple-400">XP</span>
+                  </div>
+                )}
+              </SpotlightCard>
             ))}
           </div>
         </div>
@@ -466,6 +486,30 @@ const App = () => {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="py-32 px-6 border-t border-white/5">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-6xl font-black text-white mb-6 uppercase italic tracking-tighter">FAQ</h2>
+            <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-xs">Common Curiosities</p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              { q: "Is my data safe?", a: "Absolutely. We use enterprise-grade encryption for our database and leverage WhatsApp's native end-to-end encryption for message delivery. Your data is yours alone." },
+              { q: "How do I access Kairi?", a: "Once you subscribe, you will receive a unique access link to chat with Kairi directly on WhatsApp. No new apps to download." },
+              { q: "Can I cancel anytime?", a: "Yes. You can cancel your subscription at any moment via your account portal. No questions asked." },
+              { q: "What happens if I send a voice note?", a: "Kairi's M-MCP engine transcribes and analyzes it instantly, extracting tasks and context just like a text message." }
+            ].map((faq, i) => (
+              <div key={i} className="p-6 bg-white/5 border border-white/5 rounded-3xl">
+                <h3 className="text-lg font-bold text-white mb-2">{faq.q}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Ace Elevate Vision Section */}
       <section id="vision" className="py-32 px-6">
         <motion.div
@@ -566,8 +610,8 @@ const App = () => {
           <span className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] italic leading-none">Ace Elevate Innovation Lab</span>
         </div>
         <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">
-          <a href="#" className="hover:text-pink-500 transition-colors duration-300">Privacy</a>
-          <a href="#" className="hover:text-purple-500 transition-colors duration-300">Terms</a>
+          <a href="/privacy" className="hover:text-pink-500 transition-colors duration-300">Privacy</a>
+          <a href="/terms" className="hover:text-purple-500 transition-colors duration-300">Terms</a>
           <a href="#" className="hover:text-blue-500 transition-colors duration-300">Manifesto</a>
         </div>
 
