@@ -14,9 +14,17 @@ import {
   Ghost,
   Camera,
   FileText,
-  TrendingUp
+
+  TrendingUp,
+  Instagram
 } from 'lucide-react';
 import KairiLogoImg from './Logo_Kairi_Kana.png';
+
+const TikTokIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
+  </svg>
+);
 
 const KairiLogo = () => (
   <motion.div
@@ -562,6 +570,17 @@ const App = () => {
           <a href="#" className="hover:text-purple-500 transition-colors duration-300">Terms</a>
           <a href="#" className="hover:text-blue-500 transition-colors duration-300">Manifesto</a>
         </div>
+
+        {/* Socials */}
+        <div className="flex gap-6 items-center">
+          <a href="https://www.instagram.com/ace_elevate.ai?igsh=MXBtNXNqMHpuajZhaQ==" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" className="text-slate-500 hover:text-pink-500 transition-all duration-300 transform hover:scale-110">
+            <Instagram size={20} />
+          </a>
+          <a href="https://www.tiktok.com/@acelevate.ai" target="_blank" rel="noopener noreferrer" aria-label="Follow us on TikTok" className="text-slate-500 hover:text-purple-500 transition-all duration-300 transform hover:scale-110">
+            <TikTokIcon size={20} />
+          </a>
+        </div>
+
         <div className="text-right">
           <p className="text-[9px] font-black text-slate-800 uppercase tracking-widest italic mb-2 leading-none">Built for the Global Gen-Z Era</p>
           <p className="text-[9px] font-bold text-slate-900 tracking-widest opacity-30 italic">© 2024 ACE ELEVATE GLOBAL.</p>
