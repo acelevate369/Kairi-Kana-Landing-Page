@@ -194,12 +194,19 @@ const App = () => {
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
               </a>
             ))}
-            {/* Language Switcher */}
+            {/* Desktop Language Switcher */}
             <div className="flex items-center space-x-2 border-l border-white/10 pl-6 ml-6">
               <span className="text-pink-500 font-bold">En</span>
               <span className="text-white/20">|</span>
               <a href="/id" className="hover:text-white transition-colors">Id</a>
             </div>
+          </div>
+
+          {/* Mobile Language Switcher */}
+          <div className="md:hidden flex items-center space-x-2 mr-4">
+            <span className="text-pink-500 font-bold text-xs">En</span>
+            <span className="text-white/20">|</span>
+            <a href="/id" className="hover:text-white transition-colors text-xs">Id</a>
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }}
