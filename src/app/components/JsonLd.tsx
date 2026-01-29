@@ -17,7 +17,7 @@ export default function JsonLd() {
         "operatingSystem": "Web, WhatsApp",
         "offers": {
             "@type": "Offer",
-            "price": "3.00",
+            "price": "12.99",
             "priceCurrency": "USD",
             "priceValidUntil": "2025-12-31",
             "availability": "https://schema.org/OnlineOnly",

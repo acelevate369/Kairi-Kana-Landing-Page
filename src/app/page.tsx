@@ -88,7 +88,7 @@ const App = () => {
     {
       id: 'T1',
       name: 'Shoshin',
-      price: '$3',
+      price: '$12.99',
       status: 'Live',
       color: 'from-pink-500/20',
       sellingPoint: 'Kill your manual admin. Just snap and chat.',
@@ -256,7 +256,7 @@ const App = () => {
                 onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
                 className="w-full sm:w-auto px-12 py-6 bg-white text-black rounded-2xl font-black text-xl hover:bg-pink-500 hover:text-white transition-all shadow-2xl hover:shadow-pink-500/20 active:scale-95 duration-300 italic"
               >
-                Start Shoshin — $3
+                Start Shoshin — $12.99
               </button>
               <div className="flex items-center gap-3">
                 <MousePointer2 size={16} className="text-blue-400" />
@@ -554,7 +554,7 @@ const App = () => {
             Live in <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-600 to-blue-500">Flow.</span>
           </h2>
-          <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Claim your Shoshin tier spot for $3/month. Early access invitations are being sent daily.</p>
+          <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Claim your Shoshin tier spot for $12.99/month. Early access invitations are being sent daily.</p>
 
           <AnimatePresence mode='wait'>
             {!submitted ? (
