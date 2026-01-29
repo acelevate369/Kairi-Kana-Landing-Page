@@ -38,7 +38,10 @@ const KairiLogo = () => (
 
 const App = () => {
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -49,38 +52,41 @@ const App = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Attempting to submit email:', email);
+        setLoading(true);
+        setErrorMsg('');
 
         if (!email) return;
 
         try {
-            const { data, error } = await supabase
-                .from('whitelist')
-                .insert([{ email }]);
+            // 1. Save to Supabase
+            const { error } = await supabase
+                .from('waitlist')
+                .insert([{ email, no_telf: phone, created_at: new Date().toISOString() }]);
 
             if (error) {
-                console.error('❌ Supabase Error:', error.message);
-                alert('Gagal menyimpan email. Cek console untuk detailnya.');
-            } else {
-                console.log('✅ Email saved to Supabase:', data);
-
-                // Trigger n8n Webhook
-                try {
-                    console.log('🚀 Triggering n8n webhook...');
-                    await fetch('https://omegaarch.taila8068d.ts.net/webhook/aa9c0f66-344c-478e-8d65-6178c93b17f8', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email }),
-                    });
-                    console.log('✅ n8n Webhook triggered successfully');
-                } catch (webhookError) {
-                    console.error('⚠️ Failed to trigger n8n webhook:', webhookError);
+                if (error.code === '23505') { // Unique violation
+                    setSubmitted(true);
+                    return;
                 }
-
-                setSubmitted(true);
+                throw error;
             }
+
+            // 2. Trigger n8n Webhook
+            try {
+                await fetch('https://omegaarch.taila8068d.ts.net/webhook/aa9c0f66-344c-478e-8d65-6178c93b17f8', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, phone }),
+                });
+            } catch (webhookError) {
+                // Silent fail for webhook
+            }
+
+            setSubmitted(true);
         } catch (err) {
-            console.error('❌ Unexpected Error:', err);
+            setErrorMsg('Terjadi kesalahan. Silakan coba lagi.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -94,7 +100,7 @@ const App = () => {
             sellingPoint: 'Hapus admin manualmu. Cukup foto dan chat.',
             features: [
                 'Visi Multimodal: Ubah foto papan tulis, struk, atau catatan jadi data digital.',
-                'Loop Tugas & Kebiasaan: Manajemen tugas standar dengan pelacakan kebiasaan cerdas & poin XP.',
+                'Loop Tugas & Kebiasaan: Manajemen tugas standar dengan pelacakan kebiasaan cerdas & Poin.',
                 'Penjadwalan Cerdas: Beri tahu Kairi slot kosongmu, dan dia akan petakan tugasmu secara otomatis.',
                 'Akses Asisten WhatsApp yang Disederhanakan'
             ],
@@ -345,7 +351,7 @@ const App = () => {
                             {
                                 icon: <TrendingUp className="text-purple-500" size={32} />,
                                 title: "Alur Tergamifikasi",
-                                desc: "Ubah hidupmu menjadi game. Dapatkan XP untuk setiap kebiasaan yang kamu pertahankan dan tugas yang kamu selesaikan tanpa membuka dashboard.",
+                                desc: "Kumpulkan poin dengan menyelesaikan tugas. Nantikan MILESTONE REWARDS: diskon perpanjangan, diskon upgrade tier, atau hadiah eksklusif lainnya.",
                                 className: "md:col-span-1 md:row-span-2 bg-[#0F172A]/40 border-purple-500/20"
                             },
                             {
@@ -380,7 +386,7 @@ const App = () => {
                                                 className="h-full bg-purple-500"
                                             />
                                         </div>
-                                        <span className="text-[10px] font-bold text-purple-400">XP</span>
+                                        <span className="text-[10px] font-bold text-purple-400">POIN</span>
                                     </div>
                                 )}
                             </SpotlightCard>
@@ -574,8 +580,21 @@ const App = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                 />
-                                <button className="group relative w-full py-7 bg-white text-black font-black text-2xl rounded-3xl hover:scale-[1.03] active:scale-95 transition-all shadow-2xl italic uppercase tracking-tighter overflow-hidden">
-                                    <span className="relative z-10">Secure Access</span>
+                                <input
+                                    type="number"
+                                    placeholder="Nomor WhatsApp (Cth: 62812...)"
+                                    className="w-full px-10 py-7 rounded-3xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all text-center text-xl font-black tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    required
+                                />
+                                {errorMsg && <p className="text-red-500 text-center text-xs font-bold uppercase tracking-widest">{errorMsg}</p>}
+
+                                <button
+                                    disabled={loading}
+                                    className="group relative w-full py-7 bg-white text-black font-black text-2xl rounded-3xl hover:scale-[1.03] active:scale-95 transition-all shadow-2xl italic uppercase tracking-tighter overflow-hidden disabled:opacity-50"
+                                >
+                                    <span className="relative z-10">{loading ? 'Memproses...' : 'Secure Access'}</span>
                                     <motion.div
                                         initial={{ x: '-100%' }}
                                         whileHover={{ x: '100%' }}
