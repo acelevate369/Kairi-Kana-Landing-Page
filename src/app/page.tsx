@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isValidEmail, isValidPhone, sanitizeInput } from '@/lib/validator';
 import {
   Zap,
   Check,
@@ -43,6 +44,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [activeTier, setActiveTier] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -55,13 +57,42 @@ const App = () => {
     setLoading(true);
     setErrorMsg('');
 
-    if (!email) return;
+    if (!email || !phone) {
+      setErrorMsg('Please fill in all fields.');
+      setLoading(false);
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setErrorMsg('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
+    if (!isValidPhone(phone)) {
+      setErrorMsg('Please enter a valid phone number (min 8 digits).');
+      setLoading(false);
+      return;
+    }
+
+    const cleanEmail = sanitizeInput(email);
+    const cleanPhone = sanitizeInput(phone);
 
     try {
       // 1. Save to Supabase (using no_telf column)
+      let keterangan = 'General Waitlist';
+      if (activeTier === 'T0') {
+        keterangan = 'T0 - The Creator (Bespoke)';
+      }
+
       const { error } = await supabase
         .from('waitlist')
-        .insert([{ email, no_telf: phone, created_at: new Date().toISOString() }]);
+        .insert([{
+          email: cleanEmail,
+          no_telf: cleanPhone,
+          created_at: new Date().toISOString(),
+          Keterangan: keterangan
+        }]);
 
       if (error) {
         if (error.code === '23505') { // Unique violation
@@ -76,9 +107,9 @@ const App = () => {
         await fetch('https://omegaarch.taila8068d.ts.net/webhook/aa9c0f66-344c-478e-8d65-6178c93b17f8', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, phone }),
+          body: JSON.stringify({ email: cleanEmail, phone: cleanPhone }),
         });
-      } catch (webhookError) {
+      } catch {
         // Silent fail for webhook
       }
 
@@ -138,8 +169,8 @@ const App = () => {
     {
       id: 'T0',
       name: 'The Creator',
-      price: 'Coming Soon',
-      status: 'Waitlist',
+      price: 'Bespoke',
+      status: 'Live',
       color: 'from-slate-500/20',
       sellingPoint: 'Ultimate sovereignty for digital pioneers.',
       features: [
@@ -167,17 +198,84 @@ const App = () => {
 
       {/* Background Ambience */}
       <div className="fixed inset-0 overflow-hidden -z-10">
-        <motion.div
-          animate={{ x: [0, 50, 0], y: [0, 30, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-purple-600/10 blur-[150px] rounded-full"
-        />
-        <motion.div
-          animate={{ x: [0, -40, 0], y: [0, 50, 0], scale: [1, 1.2, 1] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full"
-        />
+        <div className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-purple-600/10 blur-[150px] rounded-full animate-blob-1" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full animate-blob-2" />
       </div>
+
+      {/* Modal for T0 / Bespoke Inquiry */}
+      <AnimatePresence>
+        {activeTier && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setActiveTier(null); setSubmitted(false); }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-[#0F172A] border border-white/10 p-8 md:p-12 rounded-[3rem] max-w-lg w-full shadow-2xl overflow-hidden"
+            >
+              {!submitted ? (
+                <>
+                  <div className="text-center mb-8">
+                    <span className="text-pink-500 font-black text-4xl italic tracking-tighter mb-2 block">{activeTier === 'T0' ? 'The Creator' : 'Waitlist Access'}</span>
+                    <p className="text-slate-400 text-sm">
+                      {activeTier === 'T0'
+                        ? 'This is a bespoke tier. Enter your details and our team will get in touch.'
+                        : 'Join the waitlist for early access.'}
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <input
+                      type="email"
+                      placeholder="Professional Email"
+                      className="w-full px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-pink-500/50 transition-all text-center font-bold"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                    <input
+                      type="number"
+                      placeholder="WhatsApp (e.g. 62812...)"
+                      className="w-full px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all text-center font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                    />
+                    {errorMsg && <p className="text-red-500 text-center text-xs font-bold uppercase tracking-widest">{errorMsg}</p>}
+
+                    <button
+                      disabled={loading}
+                      className="w-full py-5 bg-white text-black font-black text-xl rounded-2xl hover:bg-pink-500 hover:text-white transition-all shadow-lg mt-4 uppercase italic"
+                    >
+                      {loading ? 'Processing...' : (activeTier === 'T0' ? 'Request Access' : 'Join Waitlist')}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Check size={32} />
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-2 uppercase italic">Received.</h3>
+                  <p className="text-slate-400 text-sm">We&apos;ve logged your request. Expect to hear from us soon.</p>
+                  <button
+                    onClick={() => { setSubmitted(false); setActiveTier(null); setEmail(''); setPhone(''); }}
+                    className="mt-8 text-xs font-bold text-slate-500 hover:text-white uppercase tracking-widest"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Navbar */}
       <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[#01040D]/90 backdrop-blur-2xl py-4 border-b border-white/5' : 'bg-transparent py-8'}`}>
@@ -243,13 +341,9 @@ const App = () => {
               <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi Kana</p>
               <h1 className="text-6xl lg:text-[8rem] font-black text-white leading-[0.85] tracking-tighter uppercase italic">
                 Kill the <br />
-                <motion.span
-                  animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
-                  transition={{ duration: 10, repeat: Infinity }}
-                  className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 bg-[length:200%_auto]"
-                >
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 animate-gradient-text">
                   Chaos.
-                </motion.span>
+                </span>
               </h1>
             </motion.div>
 
@@ -412,7 +506,7 @@ const App = () => {
               </div>
               <h2 className="text-4xl lg:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.9] italic">
                 M-MCP <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 bg-[length:200%_auto]">Processing</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 animate-gradient-text">Processing</span>
               </h2>
               <p className="text-lg text-slate-400 leading-relaxed mb-10">
                 Kairi Kana isn&apos;t just a chatbot. It&apos;s a Multi-Model Context Engine. We cross-verify every snapshot and message across distinct AI models to ensure zero hallucinations and 100% flow accuracy.
@@ -488,8 +582,22 @@ const App = () => {
                   ))}
                 </div>
 
-                <button className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}>
-                  {tier.status === 'Waitlist' ? 'Join Waitlist' : `Access ${tier.name}`}
+                <button
+                  onClick={() => {
+                    if (tier.id === 'T0') {
+                      setActiveTier('T0');
+                      setSubmitted(false);
+                    } else if (tier.status !== 'Waitlist') {
+                      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
+                >
+                  {tier.id === 'T0'
+                    ? 'Join Waitlist'
+                    : tier.status === 'Waitlist'
+                      ? 'Coming Soon'
+                      : `Access ${tier.name}`}
                 </button>
               </motion.div>
             ))}
