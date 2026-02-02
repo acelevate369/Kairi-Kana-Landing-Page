@@ -9,7 +9,7 @@ const PrivacyPage = () => {
     return (
         <div className="min-h-screen bg-[#01040D] text-slate-200 font-sans selection:bg-pink-500/30 overflow-x-hidden">
             {/* Background Overlay */}
-            <div className="fixed inset-0 overflow-hidden -z-10 bg-[url('/noise.png')] opacity-[0.03]"></div>
+            <div className="fixed inset-0 overflow-hidden -z-10 bg-[url('/noise.svg')] opacity-[0.03]"></div>
 
             <div className="max-w-4xl mx-auto px-6 py-24">
                 <motion.div
@@ -86,7 +86,7 @@ const PrivacyPage = () => {
                     whileInView={{ opacity: 1 }}
                     className="mt-24 pt-12 border-t border-white/10 text-center"
                 >
-                    <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Last Updated: January 2024</p>
+                    <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Effective Date: January 2026</p>
                 </motion.div>
 
             </div>

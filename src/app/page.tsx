@@ -650,7 +650,7 @@ const App = () => {
           <div className="flex justify-center gap-10 opacity-30 grayscale text-[9px] font-black tracking-[0.4em] uppercase italic">
             <span>Innovation Lab</span>
             <span>Individual Startup</span>
-            <span className="underline decoration-pink-500 underline-offset-4">Est. 2024</span>
+            <span className="underline decoration-pink-500 underline-offset-4">Est. 2025</span>
           </div>
         </motion.div>
       </section>
@@ -746,7 +746,7 @@ const App = () => {
         <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">
           <a href="/privacy" className="hover:text-pink-500 transition-colors duration-300">Privacy</a>
           <a href="/terms" className="hover:text-purple-500 transition-colors duration-300">Terms</a>
-          <a href="#" className="hover:text-blue-500 transition-colors duration-300">Manifesto</a>
+          <a href="/refund" className="hover:text-blue-500 transition-colors duration-300">Refund Policy</a>
         </div>
 
         {/* Socials */}
@@ -761,18 +761,11 @@ const App = () => {
 
         <div className="text-right">
           <p className="text-[9px] font-black text-slate-800 uppercase tracking-widest italic mb-2 leading-none">Built for the Global Gen-Z Era</p>
-          <p className="text-[9px] font-bold text-slate-900 tracking-widest opacity-30 italic">© 2024 ACE ELEVATE GLOBAL.</p>
+          <p className="text-[9px] font-bold text-slate-900 tracking-widest opacity-30 italic">© 2026 ACE ELEVATE GLOBAL.</p>
         </div>
       </footer>
 
-      <style jsx global>{`
-        .perspective-1000 { perspective: 1000px; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #01040D; }
-        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #FF00FF; }
-        html { scroll-behavior: smooth; }
-      `}</style>
+
     </div>
   );
 };
