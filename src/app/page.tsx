@@ -161,7 +161,7 @@ const App = () => {
       sellingPoint: 'Architect of your future. Turn data into success.',
       features: [
         'Future Self Projection: Data-driven projection of your life patterns 5 years ahead.',
-        'Financial Genius: Deep audits, investment simulations, and leak detection.',
+        'Expense Logging: Deep audits of your spending patterns and leak detection.',
         'Integrated Learning Path: Custom learning curriculum auto-generated for you.',
         'Pure Unquantized SOTA Model Access'
       ]

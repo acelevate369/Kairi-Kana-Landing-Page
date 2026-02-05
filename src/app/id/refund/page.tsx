@@ -74,8 +74,8 @@ const RefundPageId = () => {
                         <p>Ada situasi tertentu di mana pengembalian dana hanya sebagian atau ditolak:</p>
                         <ul className="list-disc pl-5 space-y-2">
                             <li>Permintaan diajukan lebih dari 14 hari setelah pembelian.</li>
-                            <li>Pembayaran perpanjangan di mana pengguna lupa membatalkan sebelum siklus penagihan (meskipun pengecualian dapat dibuat berdasarkan kebijakan kami).</li>
-                            <li>Biaya setup untuk tier "The Creator" atau Bespoke, karena ini melibatkan pekerjaan infrastruktur manual.</li>
+                            <li>Pembayaran perpanjangan di mana pengguna lupa membatalkan sebelum siklus penagihan.</li>
+                            <li><strong>Pengecualian:</strong> Pengembalian dana tidak tersedia jika pengguna telah melanggar Ketentuan Layanan kami.</li>
                         </ul>
                     </section>
 

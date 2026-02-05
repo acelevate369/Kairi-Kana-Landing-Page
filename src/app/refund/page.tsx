@@ -74,8 +74,8 @@ const RefundPage = () => {
                         <p>There are certain situations where only partial refunds are granted or denied (if applicable):</p>
                         <ul className="list-disc pl-5 space-y-2">
                             <li>Any request made more than 14 days after purchase.</li>
-                            <li>Renewal payments where the user failed to cancel before the billing cycle (though exceptions may be made at our discretion).</li>
-                            <li>Bespoke or "The Creator" tier setup fees, as these involve manual infrastructure work.</li>
+                            <li>Renewal payments where the user failed to cancel before the billing cycle.</li>
+                            <li><strong>Exceptions:</strong> Refunds are not available if the user has violated our Terms of Service.</li>
                         </ul>
                     </section>
 

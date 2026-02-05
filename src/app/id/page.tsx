@@ -157,7 +157,7 @@ const App = () => {
             sellingPoint: 'Arsitek masa depanmu. Ubah data menjadi kesuksesan.',
             features: [
                 'Proyeksi Diri Masa Depan: Proyeksi berbasis data tentang pola hidupmu 5 tahun ke depan.',
-                'Jenius Finansial: Audit mendalam, simulasi investasi, dan deteksi kebocoran.',
+                'Pencatatan Pengeluaran: Audit mendalam pola pengeluaran dan deteksi kebocoran.',
                 'Jalur Pembelajaran Terintegrasi: Kurikulum pembelajaran khusus yang dibuat otomatis untukmu.',
                 'Akses Model SOTA Murni Tanpa Kuantisasi'
             ]
