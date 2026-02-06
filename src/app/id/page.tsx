@@ -165,8 +165,8 @@ const App = () => {
         {
             id: 'T0',
             name: 'The Creator',
-            price: 'Segera Hadir',
-            status: 'Waitlist',
+            price: 'Bespoke',
+            status: 'Live',
             color: 'from-slate-500/20',
             sellingPoint: 'Kedaulatan utama bagi pionir digital.',
             features: [
