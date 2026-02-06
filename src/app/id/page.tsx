@@ -274,48 +274,63 @@ const App = () => {
             </AnimatePresence>
 
             {/* Navbar */}
-            <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? 'bg-[#01040D]/90 backdrop-blur-2xl py-4 border-b border-white/5' : 'bg-transparent py-8'}`}>
-                <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            {/* Navbar - Dynamic Island Style */}
+            <nav className={`fixed top-0 left-0 right-0 z-50 flex justify-center transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${scrolled ? 'pt-4' : 'pt-6'}`}>
+                <div
+                    className={`
+            flex justify-between items-center transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] w-full
+            ${scrolled
+                            ? 'max-w-[90%] md:max-w-[60%] bg-[#0F172A]/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-purple-500/20 rounded-full py-3 px-6'
+                            : 'max-w-7xl bg-transparent border-transparent py-4 px-6'}
+          `}
+                >
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="flex items-center space-x-3 cursor-pointer group"
                     >
-                        <KairiLogo />
+                        <div className={`p-1.5 rounded-full transition-all duration-500 ${scrolled ? 'bg-gradient-to-tr from-pink-500/20 to-purple-500/20' : 'bg-transparent'}`}>
+                            <KairiLogo />
+                        </div>
                         <div className="flex flex-col">
-                            <span className="text-xl font-black tracking-tighter text-white leading-none italic uppercase group-hover:text-pink-400 transition">KAIRI KANA</span>
-                            <span className="text-[9px] font-bold tracking-[0.3em] text-pink-500/80 uppercase">Ace Elevate Startup</span>
+                            <span className="text-lg font-black tracking-tighter text-white leading-none italic uppercase group-hover:text-pink-400 transition">KAIRI</span>
+                            {!scrolled && <span className="text-[9px] font-bold tracking-[0.3em] text-pink-500/80 uppercase">Kana</span>}
                         </div>
                     </motion.div>
-                    <div className="hidden md:flex items-center space-x-12 text-[10px] font-black uppercase tracking-widest text-slate-500">
+
+                    <div className={`hidden md:flex items-center space-x-8 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all duration-500 ${scrolled ? 'opacity-100' : 'opacity-80'}`}>
                         {['konsep', 'teknologi', 'harga'].map((item) => (
-                            <a key={item} href={`#${item}`} className="hover:text-pink-400 transition-colors duration-300 relative group py-2">
-                                {item}
+                            <a key={item} href={`#${item}`} className="hover:text-white transition-colors duration-300 relative group py-2">
+                                {item.charAt(0).toUpperCase() + item.slice(1)}
                                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
                             </a>
                         ))}
-                        {/* Desktop Language Switcher */}
-                        <div className="flex items-center space-x-2 border-l border-white/10 pl-6 ml-6">
-                            <Link href="/" className="hover:text-white transition-colors">En</Link>
-                            <span className="text-white/20">|</span>
-                            <span className="text-pink-500 font-bold">Id</span>
-                        </div>
                     </div>
 
-                    {/* Mobile Language Switcher */}
-                    <div className="md:hidden flex items-center space-x-2 mr-4">
-                        <Link href="/" className="hover:text-white transition-colors text-xs">En</Link>
-                        <span className="text-white/20">|</span>
-                        <span className="text-pink-500 font-bold text-xs">Id</span>
+                    <div className="flex items-center gap-5">
+                        {/* Desktop Language Switcher */}
+                        <div className="hidden md:flex items-center space-x-2 text-[10px] font-bold">
+                            <Link href="/" className="text-slate-500 hover:text-white transition-colors">En</Link>
+                            <span className="text-white/20">|</span>
+                            <span className="text-white">Id</span>
+                        </div>
+
+                        {/* Mobile Language Switcher */}
+                        <div className="md:hidden flex items-center space-x-2">
+                            <Link href="/" className="hover:text-white transition-colors text-xs">En</Link>
+                            <span className="text-white/20">|</span>
+                            <span className="text-pink-500 font-bold text-xs">Id</span>
+                        </div>
+
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+                            className={`bg-white text-black px-6 py-2.5 rounded-full font-black text-[10px] tracking-widest shadow-lg hover:bg-pink-500 hover:text-white transition-all`}
+                        >
+                            GABUNG
+                        </motion.button>
                     </div>
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 rounded-full font-bold text-[10px] tracking-widest shadow-lg shadow-pink-500/20"
-                    >
-                        GABUNG WAITLIST
-                    </motion.button>
                 </div>
             </nav>
 
