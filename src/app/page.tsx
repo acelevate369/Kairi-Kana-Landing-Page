@@ -174,8 +174,9 @@ const App = () => {
       color: 'from-slate-500/20',
       sellingPoint: 'Ultimate sovereignty for digital pioneers.',
       features: [
+        'True MCP (Model Context Protocol) Integration',
+        'Real-World Connection & Action Capabilities',
         'Totally Bespoke AI Infrastructure',
-        'Private Dedicated Servers',
         'Fine-tuning on your specific private knowledge base',
         '24/7 Priority Access to Ace Elevate Labs'
       ],
@@ -520,11 +521,11 @@ const App = () => {
                 <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-600 italic">Ace Elevate Technology</span>
               </div>
               <h2 className="text-4xl lg:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.9] italic">
-                M-MCP <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 animate-gradient-text">Processing</span>
+                Agentic <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 animate-gradient-text">Core</span>
               </h2>
               <p className="text-lg text-slate-400 leading-relaxed mb-10">
-                Kairi Kana isn&apos;t just a chatbot. It&apos;s a Multi-Model Context Engine. We cross-verify every snapshot and message across distinct AI models to ensure zero hallucinations and 100% flow accuracy.
+                Kairi Kana isn&apos;t just a chatbot. She is an Agentic AI powered by 16 specialized core agents. From financial auditing to schedule mapping, each agent works in harmony to maintain your personal context without hallucinations.
               </p>
               <div className="flex gap-10">
                 <div><p className="text-3xl font-black text-white italic">99.8%</p><p className="text-[9px] font-bold text-slate-600 uppercase">Accuracy</p></div>

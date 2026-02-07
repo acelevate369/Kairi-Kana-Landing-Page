@@ -170,9 +170,10 @@ const App = () => {
             color: 'from-slate-500/20',
             sellingPoint: 'Kedaulatan utama bagi pionir digital.',
             features: [
-                'Infrastruktur AI yang Benar-benar Dipesan Lebih Dahulu',
-                'Server Dedikasi Pribadi',
-                'Fine-tuning pada basis pengetahuan pribadimu yang spesifik',
+                'Integrasi True MCP (Model Context Protocol)',
+                'Koneksi Dunia Nyata & Kapabilitas Aksi',
+                'Infrastruktur AI Khusus (Bespoke)',
+                'Fine-tuning pada basis pengetahuan pribadimu',
                 'Akses Prioritas 24/7 ke Lab Ace Elevate'
             ],
             special: true
@@ -516,11 +517,11 @@ const App = () => {
                                 <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-600 italic">Teknologi Ace Elevate</span>
                             </div>
                             <h2 className="text-4xl lg:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.9] italic">
-                                Pemrosesan <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 animate-gradient-text">M-MCP</span>
+                                Agentic <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 animate-gradient-text">Core</span>
                             </h2>
                             <p className="text-lg text-slate-400 leading-relaxed mb-10">
-                                Kairi Kana bukan sekadar chatbot. Ini adalah Mesin Konteks Multi-Model. Kami memverifikasi silang setiap snapshot dan pesan di berbagai model AI berbeda untuk memastikan nol halusinasi dan akurasi alur 100%.
+                                Kairi Kana bukan sekadar chatbot. Dia adalah Agentic AI yang ditenagai oleh 16 agen inti khusus. Dari audit pengeluaran hingga pemetaan jadwal, setiap agen bekerja harmonis menjaga konteks pribadimu tanpa halusinasi.
                             </p>
                             <div className="flex gap-10">
                                 <div><p className="text-3xl font-black text-white italic">99.8%</p><p className="text-[9px] font-bold text-slate-600 uppercase">Akurasi</p></div>
