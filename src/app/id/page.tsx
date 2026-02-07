@@ -124,12 +124,12 @@ const App = () => {
             price: 'Rp 49.000',
             status: 'Live',
             color: 'from-pink-500/20',
-            sellingPoint: 'Hapus admin manualmu. Cukup foto dan chat.',
+            sellingPoint: 'Pondasi. Catat realita, hilangkan kekacauan.',
             features: [
-                'Visi Multimodal: Ubah foto papan tulis, struk, atau catatan jadi data digital.',
-                'Loop Tugas & Kebiasaan: Manajemen tugas standar dengan pelacakan kebiasaan cerdas & Poin.',
-                'Penjadwalan Cerdas: Beri tahu Kairi slot kosongmu, dan dia akan petakan tugasmu secara otomatis.',
-                'Akses Asisten WhatsApp yang Disederhanakan'
+                'Visi Multimodal: Foto struk, papan tulis, atau catatan. Kairi mencatatnya instan.',
+                'Loop Kebiasaan Dasar: Pelacakan tugas simpel tanpa basa-basi.',
+                'Log Pengeluaran: Pantau setiap rupiah dengan mudah.',
+                'Akses Asisten WhatsApp Langsung'
             ],
             popular: true
         },
@@ -139,12 +139,12 @@ const App = () => {
             price: 'Segera Hadir',
             status: 'Waitlist',
             color: 'from-purple-500/20',
-            sellingPoint: 'Asisten riset dan pelatih kehidupanmu dalam satu chat.',
+            sellingPoint: 'The PUSH. Pelatih aktif untuk memaksamu tumbuh.',
             features: [
-                'Analisis PDF/Dokumen (RAG): Unggah PDF dan ajukan pertanyaan atau minta ringkasan.',
-                'Tantangan: Tugas mini harian berdasarkan kebiasaanmu agar kamu tetap disiplin.',
-                'Jurnal Mendalam: Interaksi AI reflektif yang bertindak sebagai pelatih kehidupan pribadimu.',
-                'Konteks Memori Diperluas'
+                'Akuntabilitas Aktif: Kairi secara aktif mendorongmu menyelesaikan tugas (The PUSH).',
+                'Analisis Dokumen (RAG): Unggah materi dan belajar langsung dari chat.',
+                'Tantangan Harian: Tugas mikro untuk mendobrak batasanmu.',
+                'Jurnal Mendalam: Sesi refleksi untuk menjagamu tetap disiplin.'
             ],
 
         },
@@ -154,11 +154,11 @@ const App = () => {
             price: 'Segera Hadir',
             status: 'Waitlist',
             color: 'from-blue-500/20',
-            sellingPoint: 'Arsitek masa depanmu. Ubah data menjadi kesuksesan.',
+            sellingPoint: 'The PULL. Diri masa depanmu menarikmu maju.',
             features: [
-                'Proyeksi Diri Masa Depan: Proyeksi berbasis data tentang pola hidupmu 5 tahun ke depan.',
-                'Pencatatan Pengeluaran: Audit mendalam pola pengeluaran dan deteksi kebocoran.',
-                'Jalur Pembelajaran Terintegrasi: Kurikulum pembelajaran khusus yang dibuat otomatis untukmu.',
+                'Persona Masa Depan: Kairi berakting sebagai versi sukses DARIMU (The PULL).',
+                'Arketipe Filosofis: Pilih panduanmu (Ubermensch, Arete, Insan Kamil).',
+                'Proyeksi Finansial: Simulasi kekayaanmu 5 tahun ke depan.',
                 'Akses Model SOTA Murni Tanpa Kuantisasi'
             ]
         },
@@ -168,11 +168,11 @@ const App = () => {
             price: 'Bespoke',
             status: 'Live',
             color: 'from-slate-500/20',
-            sellingPoint: 'Kedaulatan utama bagi pionir digital.',
+            sellingPoint: 'God Mode. Kedaulatan & integrasi total.',
             features: [
-                'Integrasi True MCP (Model Context Protocol)',
+                'True MCP: Koneksikan Gmail, Kalender & tools internal.',
+                'White-Labeling: Ganti nama Kairi jadi apapun. Ini AI MILIKMU sepenuhnya.',
                 'Koneksi Dunia Nyata & Kapabilitas Aksi',
-                'Infrastruktur AI Khusus (Bespoke)',
                 'Fine-tuning pada basis pengetahuan pribadimu',
                 'Akses Prioritas 24/7 ke Lab Ace Elevate'
             ],
@@ -350,7 +350,7 @@ const App = () => {
                         </motion.div>
 
                         <motion.div variants={fadeUp} className="mb-8">
-                            <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi Kana</p>
+                            <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi AI</p>
                             <h1 className="text-6xl lg:text-[8rem] font-black text-white leading-[0.85] tracking-tighter uppercase italic">
                                 Kill the <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 animate-gradient-text">

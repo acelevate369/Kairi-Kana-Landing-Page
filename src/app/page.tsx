@@ -128,12 +128,12 @@ const App = () => {
       price: '$12.99',
       status: 'Live',
       color: 'from-pink-500/20',
-      sellingPoint: 'Kill your manual admin. Just snap and chat.',
+      sellingPoint: 'The Foundation. Log reality, kill chaos.',
       features: [
-        'Multimodal Vision: Turn photos of boards, receipts, or notes into digital data.',
-        'Task & Habit Loop: Standard task management with smart habit tracking & Points.',
-        'Smart Scheduling: Tell Kairi your free slots, and she will map your tasks automatically.',
-        'Simplified WhatsApp Assistant Access'
+        'Multimodal Vision: Snap receipts, boards, or notes. Kairi logs them instantly.',
+        'Basic Habit Loop: Simple task tracking without the fluff.',
+        'Expense Logging: Track every cent effortlessly.',
+        'Direct WhatsApp Assistant Access'
       ],
       popular: true
     },
@@ -143,14 +143,13 @@ const App = () => {
       price: 'Coming Soon',
       status: 'Waitlist',
       color: 'from-purple-500/20',
-      sellingPoint: 'Your research assistant and life coach in one chat.',
+      sellingPoint: 'The PUSH. Active coaching to force growth.',
       features: [
-        'PDF/Document Analysis (RAG): Upload PDFs and ask questions or request summaries.',
-        'The Challenge: Daily mini-tasks based on your habits to keep you disciplined.',
-        'Deep Journaling: Reflective AI interaction acting as your personal life coach.',
-        'Extended Memory Context'
+        'Active Accountability: Kairi actively pushes you to complete tasks (The PUSH).',
+        'PDF/Document RAG: Upload materials and learn directly from chat.',
+        'Daily Challenges: Micro-tasks generated to break your limits.',
+        'Deep Journaling: Reflective sessions to keep you disciplined.'
       ],
-
     },
     {
       id: 'T3',
@@ -158,11 +157,11 @@ const App = () => {
       price: 'Coming Soon',
       status: 'Waitlist',
       color: 'from-blue-500/20',
-      sellingPoint: 'Architect of your future. Turn data into success.',
+      sellingPoint: 'The PULL. Your future self dragging you forward.',
       features: [
-        'Future Self Projection: Data-driven projection of your life patterns 5 years ahead.',
-        'Expense Logging: Deep audits of your spending patterns and leak detection.',
-        'Integrated Learning Path: Custom learning curriculum auto-generated for you.',
+        'Future Self Persona: Kairi acts as the successful version of YOU (The PULL).',
+        'Philosophical Archetypes: Choose your guide (Ubermensch, Arete, Sufi Intellect).',
+        'Financial Projection: Simulate your wealth 5 years into the future.',
         'Pure Unquantized SOTA Model Access'
       ]
     },
@@ -172,11 +171,11 @@ const App = () => {
       price: 'Bespoke',
       status: 'Live',
       color: 'from-slate-500/20',
-      sellingPoint: 'Ultimate sovereignty for digital pioneers.',
+      sellingPoint: 'God Mode. Total sovereignty and integration.',
       features: [
-        'True MCP (Model Context Protocol) Integration',
-        'Real-World Connection & Action Capabilities',
-        'Totally Bespoke AI Infrastructure',
+        'True MCP: Connect Gmail, Calendar, & internal tools.',
+        'White-Labeling: Rename Kairi to anything. It becomes YOUR AI.',
+        'Real-World Action Capabilities',
         'Fine-tuning on your specific private knowledge base',
         '24/7 Priority Access to Ace Elevate Labs'
       ],
@@ -354,7 +353,7 @@ const App = () => {
             </motion.div>
 
             <motion.div variants={fadeUp} className="mb-8">
-              <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi Kana</p>
+              <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi AI</p>
               <h1 className="text-6xl lg:text-[8rem] font-black text-white leading-[0.85] tracking-tighter uppercase italic">
                 Kill the <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 animate-gradient-text">
