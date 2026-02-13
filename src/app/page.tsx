@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { isValidEmail, isValidPhone, sanitizeInput } from '@/lib/validator';
 import {
@@ -15,9 +16,13 @@ import {
   Ghost,
   Camera,
   FileText,
-
+  AlertCircle,
+  CheckCircle,
+  Info,
+  XCircle,
   TrendingUp,
-  Instagram
+  Instagram,
+  X // Added X icon
 } from 'lucide-react';
 import KairiLogoImg from './Logo_Kairi_Kana.png';
 import { SpotlightCard } from './components/SpotlightCard';
@@ -33,7 +38,13 @@ const KairiLogo = () => (
     animate={{ rotate: [0, 10, -10, 0] }}
     transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
   >
-    <Image src={KairiLogoImg} alt="Kairi Kana Logo" width={32} height={32} />
+    <Image
+      src={KairiLogoImg}
+      alt="Kairi Kana Logo"
+      width={32}
+      height={32}
+      priority // Fix LCP Warning
+    />
   </motion.div>
 );
 
@@ -45,6 +56,21 @@ const App = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [scrolled, setScrolled] = useState(false);
   const [activeTier, setActiveTier] = useState<string | null>(null);
+
+
+  // Notification State
+  const [notification, setNotification] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'warning' | 'info' }>({
+    show: false,
+    message: '',
+    type: 'info'
+  });
+
+  const showNotification = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 5000); // Auto hide after 5s
+  };
+
+
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -70,7 +96,7 @@ const App = () => {
     }
 
     if (!isValidPhone(phone)) {
-      setErrorMsg('Please enter a valid phone number (min 8 digits).');
+      setErrorMsg('Please enter a valid WhatsApp number (min 8 digits).');
       setLoading(false);
       return;
     }
@@ -79,19 +105,14 @@ const App = () => {
     const cleanPhone = sanitizeInput(phone);
 
     try {
-      // 1. Save to Supabase (using no_telf column)
-      let keterangan = 'General Waitlist';
-      if (activeTier === 'T0') {
-        keterangan = 'T0 - The Creator (Bespoke)';
-      }
-
+      // 1. Save to Supabase
       const { error } = await supabase
         .from('waitlist')
         .insert([{
           email: cleanEmail,
           no_telf: cleanPhone,
           created_at: new Date().toISOString(),
-          Keterangan: keterangan
+          Keterangan: activeTier === 'T0' ? 'T0 - The Creator (Bespoke)' : 'General Waitlist'
         }]);
 
       if (error) {
@@ -114,8 +135,8 @@ const App = () => {
       }
 
       setSubmitted(true);
-    } catch (err) {
-      setErrorMsg('Something went wrong. Please try again.');
+    } catch {
+      setErrorMsg('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -150,6 +171,7 @@ const App = () => {
         'Daily Challenges: Micro-tasks generated to break your limits.',
         'Deep Journaling: Reflective sessions to keep you disciplined.'
       ],
+
     },
     {
       id: 'T3',
@@ -222,10 +244,10 @@ const App = () => {
               {!submitted ? (
                 <>
                   <div className="text-center mb-8">
-                    <span className="text-pink-500 font-black text-4xl italic tracking-tighter mb-2 block">{activeTier === 'T0' ? 'The Creator' : 'Waitlist Access'}</span>
+                    <span className="text-pink-500 font-black text-4xl italic tracking-tighter mb-2 block">{activeTier === 'T0' ? 'The Creator' : 'Join Waitlist'}</span>
                     <p className="text-slate-400 text-sm">
                       {activeTier === 'T0'
-                        ? 'This is a bespoke tier. Enter your details and our team will get in touch.'
+                        ? 'This is a bespoke tier. Enter your details and our team will contact you.'
                         : 'Join the waitlist for early access.'}
                     </p>
                   </div>
@@ -241,7 +263,7 @@ const App = () => {
                     />
                     <input
                       type="number"
-                      placeholder="WhatsApp (e.g. 62812...)"
+                      placeholder="WhatsApp (Ex: 62812...)"
                       className="w-full px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all text-center font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -263,7 +285,7 @@ const App = () => {
                     <Check size={32} />
                   </div>
                   <h3 className="text-2xl font-black text-white mb-2 uppercase italic">Received.</h3>
-                  <p className="text-slate-400 text-sm">We&apos;ve logged your request. Expect to hear from us soon.</p>
+                  <p className="text-slate-400 text-sm">Your request has been logged. Expect to hear from us soon.</p>
                   <button
                     onClick={() => { setSubmitted(false); setActiveTier(null); setEmail(''); setPhone(''); }}
                     className="mt-8 text-xs font-bold text-slate-500 hover:text-white uppercase tracking-widest"
@@ -305,7 +327,7 @@ const App = () => {
           <div className={`hidden md:flex items-center space-x-8 text-[10px] font-black uppercase tracking-widest text-slate-400 transition-all duration-500 ${scrolled ? 'opacity-100' : 'opacity-80'}`}>
             {['concept', 'tech', 'pricing'].map((item) => (
               <a key={item} href={`#${item}`} className="hover:text-white transition-colors duration-300 relative group py-2">
-                {item}
+                {item.toUpperCase()}
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
               </a>
             ))}
@@ -314,16 +336,16 @@ const App = () => {
           <div className="flex items-center gap-5">
             {/* Desktop Language Switcher */}
             <div className="hidden md:flex items-center space-x-2 text-[10px] font-bold">
-              <span className="text-white">En</span>
+              <span className="text-white cursor-default">En</span>
               <span className="text-white/20">|</span>
-              <a href="/id" className="text-slate-500 hover:text-white transition-colors">Id</a>
+              <Link href="/id" className="text-slate-500 hover:text-white transition-colors">Id</Link>
             </div>
 
             {/* Mobile Language Switcher */}
             <div className="md:hidden flex items-center space-x-2">
-              <span className="text-pink-500 font-bold text-xs">En</span>
+              <span className="text-pink-500 font-bold text-xs cursor-default">En</span>
               <span className="text-white/20">|</span>
-              <a href="/id" className="hover:text-white transition-colors text-xs">Id</a>
+              <Link href="/id" className="text-slate-400 hover:text-white transition-colors text-xs">Id</Link>
             </div>
 
             <motion.button
@@ -353,7 +375,7 @@ const App = () => {
             </motion.div>
 
             <motion.div variants={fadeUp} className="mb-8">
-              <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi AI</p>
+              <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi Kana</p>
               <h1 className="text-6xl lg:text-[8rem] font-black text-white leading-[0.85] tracking-tighter uppercase italic">
                 Kill the <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 animate-gradient-text">
@@ -363,7 +385,7 @@ const App = () => {
             </motion.div>
 
             <motion.p variants={fadeUp} className="text-xl text-slate-400 max-w-xl mb-12 leading-relaxed font-medium">
-              You don&apos;t need another complex app. You need an assistant that lives where you do. Snap your world and let Kairi organize your life.
+              You don&#39;t need another complex app. You need an assistant that lives where you do. Snap your world and let Kairi organize your life.
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-10">
@@ -375,7 +397,7 @@ const App = () => {
               </button>
               <div className="flex items-center gap-3">
                 <MousePointer2 size={16} className="text-blue-400" />
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">500+ in the flow era</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">500+ IN THE FLOW ERA</span>
               </div>
             </motion.div>
           </motion.div>
@@ -416,7 +438,7 @@ const App = () => {
                       transition={{ delay: 1 }}
                       className="ml-auto bg-purple-600/30 border border-purple-500/20 p-4 rounded-3xl rounded-tr-none text-sm text-slate-200 max-w-[90%] shadow-lg shadow-purple-900/10"
                     >
-                      &quot;Hey Kairi, remind me to finish my Ace Elevate project deck by 9 PM tonight.&quot;
+                      Hey Kairi, remind me to finish my Ace Elevate project deck by 9 PM tonight.
                     </motion.div>
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
@@ -424,8 +446,8 @@ const App = () => {
                       transition={{ delay: 2.5 }}
                       className="mr-auto bg-white/5 border border-white/5 p-4 rounded-3xl rounded-tl-none text-sm text-slate-300 max-w-[90%] relative"
                     >
-                      <p className="text-blue-400 font-black text-[9px] uppercase tracking-widest mb-2">Kairi AI</p>
-                      Got it! 🚀 I&apos;ve set your reminder for 9 PM. Stay focused, you&apos;ve got this!
+                      <p className="text-blue-400 font-black text-[9px] uppercase tracking-widest mb-2">Kairi Kana</p>
+                      Got it! 🚀 I&#39;ve set your reminder for 9 PM. Stay focused, you&#39;ve got this!
                     </motion.div>
                   </div>
                 </div>
@@ -435,8 +457,8 @@ const App = () => {
         </div>
       </section>
 
-
-      <section id="concept" className="py-32 px-6 relative">
+      {/* The Anti-App Experience Section */}
+      <section id="konsep" className="py-32 px-6 relative">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -446,7 +468,7 @@ const App = () => {
             className="text-center mb-24"
           >
             <motion.h2 variants={fadeUp} className="text-5xl lg:text-8xl font-black text-white mb-6 uppercase italic tracking-tighter">The Anti-App</motion.h2>
-            <motion.p variants={fadeUp} className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs underline decoration-pink-500/50 underline-offset-8">No UI, No Fatigue, No Friction</motion.p>
+            <motion.p variants={fadeUp} className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs underline decoration-pink-500/50 underline-offset-8">NO UI, NO FATIGUE, NO FRICTION</motion.p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(0,1fr)]">
@@ -505,7 +527,7 @@ const App = () => {
       </section>
 
       {/* M-MCP Technology Section */}
-      <section id="tech" className="py-32 px-6">
+      <section id="teknologi" className="py-32 px-6">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -517,24 +539,24 @@ const App = () => {
             <div className="lg:w-1/2">
               <div className="flex items-center gap-3 mb-8">
                 <Cpu size={20} className="text-blue-400" />
-                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-600 italic">Ace Elevate Technology</span>
+                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-600 italic">ACE ELEVATE TECHNOLOGY</span>
               </div>
               <h2 className="text-4xl lg:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.9] italic">
                 Agentic <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 animate-gradient-text">Core</span>
               </h2>
               <p className="text-lg text-slate-400 leading-relaxed mb-10">
-                Kairi Kana isn&apos;t just a chatbot. She is an Agentic AI powered by 16 specialized core agents. From financial auditing to schedule mapping, each agent works in harmony to maintain your personal context without hallucinations.
+                Kairi Kana isn&#39;t just a chatbot. She is an Agentic AI powered by 16 specialized core agents. From financial auditing to schedule mapping, each agent works in harmony to maintain your personal context without hallucinations.
               </p>
               <div className="flex gap-10">
-                <div><p className="text-3xl font-black text-white italic">99.8%</p><p className="text-[9px] font-bold text-slate-600 uppercase">Accuracy</p></div>
-                <div><p className="text-3xl font-black text-white italic">&lt; 1.5s</p><p className="text-[9px] font-bold text-slate-600 uppercase">Latency</p></div>
+                <div><p className="text-3xl font-black text-white italic">99.8%</p><p className="text-[9px] font-bold text-slate-600 uppercase">ACCURACY</p></div>
+                <div><p className="text-3xl font-black text-white italic">&lt; 1.5s</p><p className="text-[9px] font-bold text-slate-600 uppercase">LATENCY</p></div>
               </div>
             </div>
             <div className="lg:w-1/2 space-y-6">
               {[
-                { title: "Zero Hallucination", desc: "Dual-model verification ensures records are always based on facts.", color: "pink" },
-                { title: "Smart Logic", desc: "Human-like context retention that understands messy inputs and voice notes.", color: "blue" }
+                { title: "ZERO HALLUCINATION", desc: "Dual-model verification ensures records are always based on facts.", color: "pink" },
+                { title: "SMART LOGIC", desc: "Human-like context retention that understands messy inputs and voice notes.", color: "blue" }
               ].map((box, i) => (
                 <motion.div
                   key={i}
@@ -551,11 +573,11 @@ const App = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-32 px-6">
+      <section id="harga" className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
             <h2 className="text-5xl lg:text-9xl font-black text-white tracking-tighter uppercase italic leading-none mb-6">T-Series</h2>
-            <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs underline decoration-purple-600">The Global Access Strategy</p>
+            <p className="text-slate-500 font-bold uppercase tracking-[0.4em] text-xs underline decoration-purple-600">THE GLOBAL ACCESS STRATEGY</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {pricingTiers.map((tier, i) => (
@@ -572,7 +594,7 @@ const App = () => {
 
                 {tier.popular && (
                   <div className="relative z-10 mb-4 text-center">
-                    <span className="inline-block px-5 py-1.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[8px] font-black uppercase tracking-[0.15em] rounded-full shadow-lg">Recommended</span>
+                    <span className="inline-block px-5 py-1.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[8px] font-black uppercase tracking-[0.15em] rounded-full shadow-lg">RECOMMENDED</span>
                   </div>
                 )}
 
@@ -581,7 +603,7 @@ const App = () => {
                   <h3 className="text-2xl font-black text-white mt-2 uppercase tracking-tight italic leading-none">{tier.name}</h3>
                   <div className="mt-6 flex items-baseline gap-2">
                     <span className="text-5xl font-black text-white">{tier.price}</span>
-                    {tier.price.includes('$') && <span className="text-slate-600 font-bold text-xs tracking-widest uppercase">/mo</span>}
+                    {tier.price.includes('$') && <span className="text-slate-600 font-bold text-xs tracking-widest uppercase">/MO</span>}
                   </div>
                   <p className="text-[10px] text-pink-400 font-black uppercase tracking-widest mt-4 mb-2 italic">{tier.sellingPoint}</p>
                 </div>
@@ -602,17 +624,20 @@ const App = () => {
                     if (tier.id === 'T0') {
                       setActiveTier('T0');
                       setSubmitted(false);
-                    } else if (tier.status !== 'Waitlist') {
+                      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
+                    } else {
                       document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
                     }
                   }}
                   className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
                 >
-                  {tier.id === 'T0'
-                    ? 'Join Waitlist'
-                    : tier.status === 'Waitlist'
-                      ? 'Coming Soon'
-                      : `Access ${tier.name}`}
+                  {tier.id === 'T1'
+                    ? 'ACCESS SHOSHIN'
+                    : tier.id === 'T0'
+                      ? 'JOIN WAITLIST'
+                      : tier.status === 'Waitlist'
+                        ? 'JOIN WAITLIST'
+                        : `ACCESS ${tier.name}`}
                 </button>
               </motion.div>
             ))}
@@ -627,15 +652,15 @@ const App = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-6xl font-black text-white mb-6 uppercase italic tracking-tighter">FAQ</h2>
-            <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-xs">Common Curiosities</p>
+            <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-xs">FREQUENTLY ASKED QUESTIONS</p>
           </div>
 
           <div className="space-y-4">
             {[
-              { q: "Is my data safe?", a: "Absolutely. We use enterprise-grade encryption for our database and leverage WhatsApp's native end-to-end encryption for message delivery. Your data is yours alone." },
-              { q: "How do I access Kairi?", a: "Once you subscribe, you will receive a unique access link to chat with Kairi directly on WhatsApp. No new apps to download." },
-              { q: "Can I cancel anytime?", a: "Yes. You can cancel your subscription at any moment via your account portal. No questions asked." },
-              { q: "What happens if I send a voice note?", a: "Kairi's M-MCP engine transcribes and analyzes it instantly, extracting tasks and context just like a text message." }
+              { q: "Is my data safe?", a: "Absolutely. We use enterprise-grade encryption for our database and leverage WhatsApp's native end-to-end encryption. Your data is yours." },
+              { q: "How do I access Kairi?", a: "After subscribing, you'll receive a unique access link to chat directly with Kairi on WhatsApp. No new apps to download." },
+              { q: "Can I cancel anytime?", a: "Yes. You can cancel your subscription anytime via your account portal. No hassle." },
+              { q: "What about voice notes?", a: "Kairi's M-MCP engine instantly transcribes and analyzes voice notes, extracting tasks and context just like text." }
             ].map((faq, i) => (
               <div key={i} className="p-6 bg-white/5 border border-white/5 rounded-3xl">
                 <h3 className="text-lg font-bold text-white mb-2">{faq.q}</h3>
@@ -658,9 +683,9 @@ const App = () => {
           <div className="w-24 h-24 rounded-full bg-slate-900 border-2 border-white/10 flex items-center justify-center mx-auto mb-10 overflow-hidden grayscale">
             <User size={48} className="text-slate-600" />
           </div>
-          <h2 className="text-3xl lg:text-5xl font-black text-white mb-8 tracking-tighter italic uppercase">Ace Elevate Vision</h2>
+          <h2 className="text-3xl lg:text-5xl font-black text-white mb-8 tracking-tighter italic uppercase">ACE ELEVATE VISION</h2>
           <p className="text-xl text-slate-400 italic leading-relaxed max-w-2xl mx-auto mb-12 font-medium">
-            &quot;We were promised technology would simplify our lives, but we ended up working for our apps. Kairi Kana is the Anti-App. Zero setup, 100% flow. Built for those who have a world to build, not a notification center to manage.&quot;
+            &quot;We were promised technology would simplify life, but we ended up working for our apps. Kairi Kana is the Anti-App. Zero setup, 100% flow. Built for those who have a world to build, not a notification center to manage.&quot;
           </p>
           <div className="flex justify-center gap-10 opacity-30 grayscale text-[9px] font-black tracking-[0.4em] uppercase italic">
             <span>Innovation Lab</span>
@@ -683,7 +708,7 @@ const App = () => {
             Live in <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-600 to-blue-500">Flow.</span>
           </h2>
-          <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Claim your Shoshin tier spot for $12.99/month. Early access invitations are being sent daily.</p>
+          <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Secure your Shoshin tier slot for $12.99/mo. Early access invites sent daily.</p>
 
           <AnimatePresence mode='wait'>
             {!submitted ? (
@@ -697,7 +722,7 @@ const App = () => {
               >
                 <input
                   type="email"
-                  placeholder="Drop your professional email"
+                  placeholder="Enter your professional email"
                   className="w-full px-10 py-7 rounded-3xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-pink-500/50 transition-all text-center text-xl font-black tracking-tighter"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -705,7 +730,7 @@ const App = () => {
                 />
                 <input
                   type="number"
-                  placeholder="WhatsApp Number (e.g. 62812...)"
+                  placeholder="WhatsApp Number (Ex: 62812...)"
                   className="w-full px-10 py-7 rounded-3xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-blue-500/50 transition-all text-center text-xl font-black tracking-tighter [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -717,7 +742,7 @@ const App = () => {
                   disabled={loading}
                   className="group relative w-full py-7 bg-white text-black font-black text-2xl rounded-3xl hover:scale-[1.03] active:scale-95 transition-all shadow-2xl italic uppercase tracking-tighter overflow-hidden disabled:opacity-50"
                 >
-                  <span className="relative z-10">{loading ? 'Securing...' : 'Secure Access'}</span>
+                  <span className="relative z-10">{loading ? 'Processing...' : 'Secure Access'}</span>
                   <motion.div
                     initial={{ x: '-100%' }}
                     whileHover={{ x: '100%' }}
@@ -741,8 +766,8 @@ const App = () => {
                 >
                   <Check size={40} strokeWidth={4} />
                 </motion.div>
-                <h3 className="text-4xl font-black text-white mb-3 tracking-tight italic uppercase leading-none text-center">Spot Secured.</h3>
-                <p className="text-slate-500 italic font-medium text-center">Ace Elevate will contact you shortly. Get ready for the flow era.</p>
+                <h3 className="text-4xl font-black text-white mb-3 tracking-tight italic uppercase leading-none text-center">SLOT SECURED.</h3>
+                <p className="text-slate-500 italic font-medium text-center">Ace Elevate will contact you shortly. Prepare for the flow era.</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -759,26 +784,61 @@ const App = () => {
           <span className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] italic leading-none">Ace Elevate Innovation Lab</span>
         </div>
         <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">
-          <a href="/privacy" className="hover:text-pink-500 transition-colors duration-300">Privacy</a>
-          <a href="/terms" className="hover:text-purple-500 transition-colors duration-300">Terms</a>
+          <a href="/privacy" className="hover:text-pink-500 transition-colors duration-300">Privacy Policy</a>
+          <a href="/terms" className="hover:text-purple-500 transition-colors duration-300">Terms & Conditions</a>
           <a href="/refund" className="hover:text-blue-500 transition-colors duration-300">Refund Policy</a>
         </div>
 
         {/* Socials */}
         <div className="flex gap-6 items-center">
-          <a href="https://www.instagram.com/ace_elevate.ai?igsh=MXBtNXNqMHpuajZhaQ==" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram" className="text-slate-500 hover:text-pink-500 transition-all duration-300 transform hover:scale-110">
+          <a href="https://www.instagram.com/ace_elevate.ai?igsh=MXBtNXNqMHpuajZhaQ==" target="_blank" rel="noopener noreferrer" aria-label="Ikuti kami di Instagram" className="text-slate-500 hover:text-pink-500 transition-all duration-300 transform hover:scale-110">
             <Instagram size={20} />
           </a>
-          <a href="https://www.tiktok.com/@acelevate.ai" target="_blank" rel="noopener noreferrer" aria-label="Follow us on TikTok" className="text-slate-500 hover:text-purple-500 transition-all duration-300 transform hover:scale-110">
+          <a href="https://www.tiktok.com/@acelevate.ai" target="_blank" rel="noopener noreferrer" aria-label="Ikuti kami di TikTok" className="text-slate-500 hover:text-purple-500 transition-all duration-300 transform hover:scale-110">
             <TikTokIcon size={20} />
           </a>
         </div>
 
         <div className="text-right">
-          <p className="text-[9px] font-black text-slate-800 uppercase tracking-widest italic mb-2 leading-none">Built for the Global Gen-Z Era</p>
+          <p className="text-[9px] font-black text-slate-800 uppercase tracking-widest italic mb-2 leading-none">Built for Global Gen-Z Era</p>
           <p className="text-[9px] font-bold text-slate-900 tracking-widest opacity-30 italic">© 2026 ACE ELEVATE GLOBAL.</p>
         </div>
       </footer>
+
+
+
+
+      {/* Notification Toast */}
+      <AnimatePresence>
+        {notification.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -100 }}
+            className={`fixed top-4 left-1/2 -translate-x-1/2 z-[110] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border backdrop-blur-md min-w-[300px] ${notification.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+              notification.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                notification.type === 'warning' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
+                  'bg-blue-500/10 border-blue-500/20 text-blue-400'
+              }`}
+          >
+            {notification.type === 'success' && <CheckCircle size={24} />}
+            {notification.type === 'error' && <XCircle size={24} />}
+            {notification.type === 'warning' && <AlertCircle size={24} />}
+            {notification.type === 'info' && <Info size={24} />}
+            <div>
+              <h4 className="font-bold text-sm uppercase tracking-wider">
+                {notification.type === 'success' ? 'Success' :
+                  notification.type === 'error' ? 'Error' :
+                    notification.type === 'warning' ? 'Pending' : 'Info'}
+              </h4>
+              <p className="text-xs opacity-90">{notification.message}</p>
+            </div>
+            <button onClick={() => setNotification(prev => ({ ...prev, show: false }))} className="ml-auto opacity-50 hover:opacity-100">
+              <X size={16} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
 
     </div>

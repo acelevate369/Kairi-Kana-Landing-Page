@@ -16,12 +16,17 @@ import {
     Ghost,
     Camera,
     FileText,
-
+    AlertCircle,
+    CheckCircle,
+    Info,
+    XCircle,
     TrendingUp,
-    Instagram
+    Instagram,
+    X // Added X icon
 } from 'lucide-react';
 import KairiLogoImg from '../Logo_Kairi_Kana.png';
 import { SpotlightCard } from '../components/SpotlightCard';
+import Script from 'next/script'; // Added Script
 
 const TikTokIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
@@ -34,7 +39,13 @@ const KairiLogo = () => (
         animate={{ rotate: [0, 10, -10, 0] }}
         transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
     >
-        <Image src={KairiLogoImg} alt="Kairi Kana Logo" width={32} height={32} />
+        <Image
+            src={KairiLogoImg}
+            alt="Kairi Kana Logo"
+            width={32}
+            height={32}
+            priority // Fix LCP Warning
+        />
     </motion.div>
 );
 
@@ -46,6 +57,159 @@ const App = () => {
     const [errorMsg, setErrorMsg] = useState('');
     const [scrolled, setScrolled] = useState(false);
     const [activeTier, setActiveTier] = useState<string | null>(null);
+
+    // Payment Awal State
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [selectedTier, setSelectedTier] = useState<any>(null);
+    const [paymentForm, setPaymentForm] = useState({ name: '', email: '', whatsapp: '', timezone: '' });
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    useEffect(() => {
+        // BuatAuto-detect Timezone
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        setPaymentForm(prev => ({ ...prev, timezone: tz }));
+    }, []);
+
+    // Notification State
+    const [notification, setNotification] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'warning' | 'info' }>({
+        show: false,
+        message: '',
+        type: 'info'
+    });
+
+    const showNotification = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+        setNotification({ show: true, message, type });
+        setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 5000); // Auto hide after 5s
+    };
+
+    const handlePurchase = (tier: any) => {
+        if (tier.id !== 'T1') return; // Sementara T1 doang aktif
+        setSelectedTier(tier);
+        setIsPaymentModalOpen(true);
+    };
+
+    const onPaymentSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsProcessing(true);
+
+        // Enforce '62' prefix for WhatsApp
+        let formattedPhone = paymentForm.whatsapp.replace(/\D/g, ''); // Remove all non-digits
+        if (formattedPhone.startsWith('0')) {
+            formattedPhone = '62' + formattedPhone.slice(1); // 0812 -> 62812
+        } else if (!formattedPhone.startsWith('62')) {
+            formattedPhone = '62' + formattedPhone; // 812 -> 62812
+        }
+
+        try {
+            const res = await fetch('/api/pay', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    firstName: paymentForm.name,
+                    email: paymentForm.email,
+                    phone: formattedPhone, // Use formatted phone
+                    tierId: selectedTier.id,
+                    price: selectedTier.price,
+                    timezone: paymentForm.timezone // Pass clean Timezone
+                }),
+            });
+            const data = await res.json();
+
+            if (data.token) {
+                // Check if Snap is ready
+                // @ts-ignore
+                if (!window.snap) {
+                    showNotification("Gagal memuat sistem pembayaran. Coba refresh atau matikan AdBlock.", 'error');
+                    setIsProcessing(false);
+                    return;
+                }
+
+                // @ts-ignore
+                window.snap.pay(data.token, {
+                    onSuccess: function (result: any) {
+                        // Extract Token for Recurring
+                        let token = null;
+                        let accountId = null;
+
+                        if (result.payment_type === 'credit_card') {
+                            // PRIORITY: saved_token_id is crucial for recurring!
+                            token = result.saved_token_id || result.token_id;
+                        } else if (result.payment_type === 'gopay') {
+                            // GoPay Tokenization logic as per user snippet
+                            if (result.metadata?.payment_options?.[0]?.token) {
+                                token = result.metadata.payment_options[0].token;
+                            }
+                            if (result.account_id) {
+                                accountId = result.account_id;
+                            }
+                        }
+
+                        // Update Status ke API dengan Data Lengkap
+                        fetch('/api/pay/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                orderId: data.orderId,
+                                status: 'success', // Will map to 'active' in backend
+                                payment_type: result.payment_type,
+                                token: token,
+                                account_id: accountId,
+                                email: paymentForm.email
+                            })
+                        })
+                            .then(res => res.json())
+                            .catch(err => { });
+
+                        showNotification("Pembayaran Berhasil! Terima kasih.", 'success');
+                        setIsPaymentModalOpen(false);
+                        setIsProcessing(false);
+
+                        // Auto Redirect to WhatsApp after 1s
+                        setTimeout(() => {
+                            window.location.href = "https://wa.me/62895324043459?text=Halo%20Kairi";
+                        }, 1000);
+                    },
+                    onPending: function (result: any) {
+                        fetch('/api/pay/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: data.orderId, status: 'pending' })
+                        })
+                            .then(res => res.json())
+                            .catch(err => { });
+
+                        showNotification("Menunggu Pembayaran... Cek email/WA Anda.", 'warning');
+                        setIsPaymentModalOpen(false);
+                        setIsProcessing(false);
+                    },
+                    onError: function (result: any) {
+                        fetch('/api/pay/update', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orderId: data.orderId, status: 'failure' })
+                        })
+                            .then(res => res.json())
+                            .catch(err => { });
+
+                        showNotification("Pembayaran Gagal! Silakan coba lagi.", 'error');
+                        setIsPaymentModalOpen(false);
+                        setIsProcessing(false);
+                    },
+                    onClose: function () {
+                        showNotification("Anda menutup popup tanpa menyelesaikan pembayaran.", 'info');
+                        setIsProcessing(false);
+                    }
+                });
+            } else {
+                showNotification('Gagal memproses transaksi: ' + (data.error || 'Unknown error'), 'error');
+                setIsProcessing(false);
+            }
+        } catch (err) {
+            // console.error(err);
+            showNotification('Terjadi kesalahan koneksi.', 'error');
+            setIsProcessing(false);
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -350,7 +514,7 @@ const App = () => {
                         </motion.div>
 
                         <motion.div variants={fadeUp} className="mb-8">
-                            <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi AI</p>
+                            <p className="text-2xl lg:text-3xl font-black text-pink-500 italic tracking-tighter uppercase leading-none mb-4">Kairi Kana</p>
                             <h1 className="text-6xl lg:text-[8rem] font-black text-white leading-[0.85] tracking-tighter uppercase italic">
                                 Kill the <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-500 to-blue-400 animate-gradient-text">
@@ -365,7 +529,7 @@ const App = () => {
 
                         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-10">
                             <button
-                                onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+                                onClick={() => document.getElementById('harga')?.scrollIntoView({ behavior: 'smooth' })}
                                 className="w-full sm:w-auto px-12 py-6 bg-white text-black rounded-2xl font-black text-xl hover:bg-pink-500 hover:text-white transition-all shadow-2xl hover:shadow-pink-500/20 active:scale-95 duration-300 italic"
                             >
                                 Mulai Shoshin — Rp 49rb
@@ -413,7 +577,7 @@ const App = () => {
                                             transition={{ delay: 1 }}
                                             className="ml-auto bg-purple-600/30 border border-purple-500/20 p-4 rounded-3xl rounded-tr-none text-sm text-slate-200 max-w-[90%] shadow-lg shadow-purple-900/10"
                                         >
-                                            &quot;Hai Kairi, ingatkan aku untuk menyelesaikan presentasi proyek Ace Elevate sebelum jam 9 malam ini.&quot;
+                                            Hai Kairi, ingatkan aku untuk menyelesaikan presentasi proyek Ace Elevate sebelum jam 9 malam ini.
                                         </motion.div>
                                         <motion.div
                                             initial={{ opacity: 0, x: -20 }}
@@ -421,7 +585,7 @@ const App = () => {
                                             transition={{ delay: 2.5 }}
                                             className="mr-auto bg-white/5 border border-white/5 p-4 rounded-3xl rounded-tl-none text-sm text-slate-300 max-w-[90%] relative"
                                         >
-                                            <p className="text-blue-400 font-black text-[9px] uppercase tracking-widest mb-2">Kairi AI</p>
+                                            <p className="text-blue-400 font-black text-[9px] uppercase tracking-widest mb-2">Kairi Kana</p>
                                             Siap! 🚀 Pengingat sudah diatur jam 9 malam. Tetap fokus, kamu pasti bisa!
                                         </motion.div>
                                     </div>
@@ -596,20 +760,25 @@ const App = () => {
 
                                 <button
                                     onClick={() => {
-                                        if (tier.id === 'T0') {
+                                        if (tier.id === 'T1') {
+                                            handlePurchase(tier);
+                                        } else if (tier.id === 'T0') {
                                             setActiveTier('T0');
                                             setSubmitted(false);
+                                            document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
                                         } else if (tier.status !== 'Waitlist') {
                                             document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
                                         }
                                     }}
                                     className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
                                 >
-                                    {tier.id === 'T0'
-                                        ? 'Minta Akses'
-                                        : tier.status === 'Waitlist'
-                                            ? 'Gabung Waitlist'
-                                            : `Akses ${tier.name}`}
+                                    {tier.id === 'T1'
+                                        ? 'Beli Sekarang'
+                                        : tier.id === 'T0'
+                                            ? 'Minta Akses'
+                                            : tier.status === 'Waitlist'
+                                                ? 'Gabung Waitlist'
+                                                : `Akses ${tier.name}`}
                                 </button>
                             </motion.div>
                         ))}
@@ -777,7 +946,132 @@ const App = () => {
                 </div>
             </footer>
 
+            {/* PAYMENT MODAL */}
+            <AnimatePresence>
+                {isPaymentModalOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.95 }}
+                            className="bg-slate-900 border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
+                        >
+                            <button
+                                onClick={() => setIsPaymentModalOpen(false)}
+                                className="absolute top-4 right-4 text-slate-500 hover:text-white"
+                            >
+                                <X size={24} />
+                            </button>
+                            <h3 className="text-2xl font-bold text-white mb-2">Langganan {selectedTier?.name}</h3>
+                            <p className="text-slate-400 mb-6 text-sm">Lengkapi data untuk memproses pembayaran lisensi Anda.</p>
 
+                            <form onSubmit={onPaymentSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors"
+                                        placeholder="Nama Anda"
+                                        value={paymentForm.name}
+                                        onChange={(e) => setPaymentForm({ ...paymentForm, name: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nomor WhatsApp</label>
+                                    <input
+                                        type="tel"
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors"
+                                        placeholder="62812..."
+                                        value={paymentForm.whatsapp}
+                                        onChange={(e) => setPaymentForm({ ...paymentForm, whatsapp: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors"
+                                        onChange={(e) => setPaymentForm({ ...paymentForm, email: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Timezone (Auto-detected)</label>
+                                    <input
+                                        type="text"
+                                        readOnly
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/50 cursor-not-allowed focus:outline-none transition-colors"
+                                        value={paymentForm.timezone}
+                                    />
+                                </div>
+
+                                {/* Save Card Hint */}
+                                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 flex gap-3 items-start my-4">
+                                    <AlertCircle className="text-yellow-400 shrink-0 mt-0.5" size={16} />
+                                    <p className="text-xs text-yellow-200/90 leading-relaxed">
+                                        <strong>PENTING:</strong> Mohon centang opsi <strong>&quot;Save Card&quot;</strong> (Simpan Kartu) di jendela pembayaran agar langganan otomatis aktif.
+                                    </p>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isProcessing}
+                                    className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-pink-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                                >
+                                    {isProcessing ? 'Memproses...' : `Bayar ${selectedTier?.price}`}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+
+            {/* Notification Toast */}
+            <AnimatePresence>
+                {notification.show && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -100 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -100 }}
+                        className={`fixed top-4 left-1/2 -translate-x-1/2 z-[110] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border backdrop-blur-md min-w-[300px] ${notification.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                            notification.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                                notification.type === 'warning' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
+                                    'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                            }`}
+                    >
+                        {notification.type === 'success' && <CheckCircle size={24} />}
+                        {notification.type === 'error' && <XCircle size={24} />}
+                        {notification.type === 'warning' && <AlertCircle size={24} />}
+                        {notification.type === 'info' && <Info size={24} />}
+                        <div>
+                            <h4 className="font-bold text-sm uppercase tracking-wider">
+                                {notification.type === 'success' ? 'Sukses' :
+                                    notification.type === 'error' ? 'Error' :
+                                        notification.type === 'warning' ? 'Pending' : 'Info'}
+                            </h4>
+                            <p className="text-xs opacity-90">{notification.message}</p>
+                        </div>
+                        <button onClick={() => setNotification(prev => ({ ...prev, show: false }))} className="ml-auto opacity-50 hover:opacity-100">
+                            <X size={16} />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Midtrans Snap Script - Sandbox URL (Matching Backend) */}
+            <Script
+                src="https://app.midtrans.com/snap/snap.js"
+                data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY} // Ensure this is set in .env.local
+                strategy="afterInteractive" // Changed from lazyOnload to prioritize loading
+            />
         </div>
     );
 };

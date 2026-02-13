@@ -15,7 +15,7 @@ export default function JsonLd() {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Kairi Kana - Agentic AI Personal Assistant",
-        "alternateName": ["Kairi AI", "Kairi Kana AI", "Ace Elevate AI"],
+        "alternateName": ["Kairi Kana", "Kairi Kana AI", "Ace Elevate AI", "Kairi Kana AI", "Kairi AI", "AI Productivity"],
         "description": "The world's first context-aware Agentic AI assistant living in WhatsApp. Powered by 16 core AI agents for seamless task automation, expense logging, and flow state management.",
         "applicationCategory": "ProductivityApplication",
         "operatingSystem": "Cross-platform, WhatsApp, Web",
@@ -54,7 +54,7 @@ export default function JsonLd() {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "Kairi Kana AI",
-        "alternateName": ["Kairi AI", "Kairi Kana Agentic AI"],
+        "alternateName": ["Kairi Kana", "Kairi Kana Agentic AI", "Kairi Kana AI", "Kairi AI", "AI Productivity"],
         "url": "https://kairikana.vercel.app",
         "description": "Official home of Kairi Kana, the Agentic AI assistant.",
         "publisher": {
