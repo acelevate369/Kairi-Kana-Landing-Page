@@ -1,93 +1,106 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { snap } from '@/lib/midtrans'; // Ensure we have the Midtrans SDK initialized
+import { snap } from '@/lib/midtrans';
 
 // Initialize Supabase Client (Server-side)
-// CRITICAL: Use Service Role Key to bypass RLS policies for backend processing
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: Request) {
     try {
-        const { orderId, payment_type, token, account_id, email } = await request.json();
+        const body = await request.json();
+
+        // 1. Handle Payload Variations (Frontend vs Midtrans Webhook)
+        // Midtrans Webhook uses 'order_id', Frontend might use 'orderId'
+        const orderId = body.order_id || body.orderId;
+        const transactionStatus = body.transaction_status;
+        const fraudStatus = body.fraud_status;
+        const paymentType = body.payment_type;
 
         if (!orderId) {
             return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
         }
 
-        // 🔒 SECURITY CHECK: Don't trust the frontend status!
-        // Verify directly with Midtrans Server to prevent spoofing.
-        let transactionStatusResponse;
+        // 2. 🔒 SECURITY CHECK: Verify Status with Midtrans
+        // Always trust Midtrans Server State over the payload to prevent spoofing
+        let midtransStatus;
         try {
-            transactionStatusResponse = await snap.transaction.status(orderId);
+            midtransStatus = await snap.transaction.status(orderId);
         } catch (midtransError) {
-            console.error("Midtrans Status Check Failed:", midtransError);
+            console.error("Midtrans Verification Failed:", midtransError);
             return NextResponse.json({ error: 'Verification failed' }, { status: 500 });
         }
 
-        const fraudStatus = transactionStatusResponse.fraud_status;
-        const transactionStatus = transactionStatusResponse.transaction_status;
+        const cleanFraudStatus = midtransStatus.fraud_status;
+        const cleanTransactionStatus = midtransStatus.transaction_status;
+        const cleanPaymentType = midtransStatus.payment_type;
 
-        // Determine Status based on Midtrans Response
+        // 3. Determine Final Status
         let finalStatus = 'pending';
         let statusMessage = 'Waiting for payment';
 
-        if (transactionStatus == 'capture') {
-            if (fraudStatus == 'challenge') {
+        if (cleanTransactionStatus == 'capture') {
+            if (cleanFraudStatus == 'challenge') {
                 finalStatus = 'challenge';
                 statusMessage = 'Payment Challenged';
-            } else if (fraudStatus == 'accept') {
+            } else if (cleanFraudStatus == 'accept') {
                 finalStatus = 'active'; // Success!
                 statusMessage = 'Payment Successful';
             }
-        } else if (transactionStatus == 'settlement') {
+        } else if (cleanTransactionStatus == 'settlement') {
             finalStatus = 'active'; // Success!
             statusMessage = 'Payment Successful';
-        } else if (transactionStatus == 'cancel' || transactionStatus == 'deny' || transactionStatus == 'expire') {
+        } else if (cleanTransactionStatus == 'cancel' || cleanTransactionStatus == 'deny' || cleanTransactionStatus == 'expire') {
             finalStatus = 'failure';
             statusMessage = 'Payment Failed/Expired';
-        } else if (transactionStatus == 'pending') {
-            finalStatus = 'pending';
-            statusMessage = 'Waiting for payment';
         }
 
+        // 4. Update Supabase
         const updates: any = {
             status: finalStatus,
             status_message: statusMessage,
+            payment_type: cleanPaymentType,
             update_at: new Date().toISOString()
         };
 
-        if (payment_type) updates.payment_type = payment_type;
+        // Extract Tokens for Recurring if available
+        // Note: These might come from Frontend payload or Midtrans Metadata depending on flow
+        if (body.token) updates['token'] = body.token;
+        if (body.account_id) updates['account_id (GoPay)'] = body.account_id;
+        if (body.saved_token_id) updates['token (Card Payment)'] = body.saved_token_id;
 
-        // Kartu Kredit Token Logic
-        if (payment_type === 'credit_card' && token) {
-            updates['token (Card Payment)'] = token;
-            updates['token'] = token;
-        }
-
-        // GoPay Token Logic
-        if (payment_type === 'gopay') {
-            if (token) updates['token (GoPay)'] = token;
-            if (account_id) updates['account_id (GoPay)'] = account_id;
-            if (token) updates['token'] = token;
-        }
-
-        if (email) updates.email = email;
-
-        const { data, error: MxError } = await supabase
+        const { error: dbError } = await supabase
             .from('subscription')
             .update(updates)
-            .eq('order_id', orderId)
-            .select();
+            .eq('order_id', orderId);
 
-        if (MxError) {
-            throw new Error(MxError.message);
+        if (dbError) throw new Error(dbError.message);
+
+        // 5. 🚀 FORWARD TO N8N (The Critical Step)
+        // Only forward if status is active/success to save n8n executions, or forward everything if you debug
+        if (finalStatus === 'active') {
+            try {
+                await fetch('https://omegaarch.taila8068d.ts.net/webhook/subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...midtransStatus, // Send full official Midtrans data
+                        custom_field: {
+                            origin: 'Vercel API',
+                            email: body.email || midtransStatus.metadata?.user_email
+                        }
+                    })
+                });
+            } catch (n8nError) {
+                console.error("N8N Forward Error (Non-blocking):", n8nError);
+            }
         }
 
-        return NextResponse.json({ message: 'Subscription verified & updated', status: finalStatus });
+        return NextResponse.json({ message: 'OK', status: finalStatus });
+
     } catch (error: any) {
-        // console.error('Supabase Update Error:', error); // Cleaned up log
+        console.error('Webhook Error:', error.message);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
