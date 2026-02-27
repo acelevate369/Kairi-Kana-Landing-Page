@@ -12,12 +12,35 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: Request) {
     try {
-        const { firstName, email, phone, tierId, price, timezone } = await request.json();
+        const body = await request.json();
+        const { firstName, email, phone, tierId, price, timezone } = body;
+
+        // Input Validation
+        if (!firstName || !email || !phone || !tierId || !price) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+        }
+
+        // Validate tier ID
+        const validTiers = ['T0', 'T1', 'T2', 'T3'];
+        if (!validTiers.includes(tierId)) {
+            return NextResponse.json({ error: 'Invalid tier' }, { status: 400 });
+        }
 
         // 1. Generate Order ID (UUID)
         const orderId = uuidv4();
-        const grossAmount = parseInt(price.replace(/[^0-9]/g, '')); // Remove 'Rp' and dots
-        const cleanPhone = phone.replace(/[^0-9]/g, ''); // Ensure numeric only here too
+        const grossAmount = parseInt(price.replace(/[^0-9]/g, ''));
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+
+        // Validate parsed amount
+        if (!grossAmount || grossAmount <= 0) {
+            return NextResponse.json({ error: 'Invalid price' }, { status: 400 });
+        }
 
         // 2. Prepare Midtrans Parameter
         const parameter = {

@@ -9,13 +9,20 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        const rawBody = await request.text();
+
+        // Body size check (max 10KB)
+        if (rawBody.length > 10240) {
+            return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+        }
+
+        const body = JSON.parse(rawBody);
 
         // 1. Handle Payload Variations
         const orderId = body.order_id || body.orderId;
 
-        if (!orderId) {
-            return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
+        if (!orderId || typeof orderId !== 'string' || orderId.length > 100) {
+            return NextResponse.json({ error: 'Order ID is required and must be valid' }, { status: 400 });
         }
 
         // 2. 🔒 SECURITY CHECK (Strict Signature Verification)
@@ -91,6 +98,11 @@ export async function POST(request: Request) {
                 // Determine email (payload or metadata)
                 const userEmail = body.email || body.metadata?.user_email || 'unknown@user.com';
 
+                // Calculate subscription end date (Midtrans = 1 month subscription)
+                const endDate = new Date();
+                endDate.setMonth(endDate.getMonth() + 1);
+                const subscriptionEndDate = endDate.toISOString();
+
                 // Fire and forget, don't await response
                 fetch('https://omegaarch.taila8068d.ts.net/webhook/subscription', {
                     method: 'POST',
@@ -98,6 +110,8 @@ export async function POST(request: Request) {
                     body: JSON.stringify({
                         ...body, // Send original payload
                         final_status: finalStatus,
+                        subscription_end_date: subscriptionEndDate,
+                        is_trial: false,
                         custom_field: {
                             origin: 'Vercel API',
                             email: userEmail

@@ -470,6 +470,10 @@ const App = () => {
                                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
                             </a>
                         ))}
+                        <Link href="/id/blog" className="hover:text-white transition-colors duration-300 relative group py-2">
+                            BLOG
+                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+                        </Link>
                     </div>
 
                     <div className="flex items-center gap-5">

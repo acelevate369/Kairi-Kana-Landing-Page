@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from '@/lib/supabaseClient';
+import { v4 as uuidv4 } from 'uuid';
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react';
 import KairiLogoImg from './Logo_Kairi_Kana.png';
 import { SpotlightCard } from './components/SpotlightCard';
+import Script from 'next/script';
 
 const TikTokIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
@@ -57,6 +59,17 @@ const App = () => {
   const [scrolled, setScrolled] = useState(false);
   const [activeTier, setActiveTier] = useState<string | null>(null);
 
+  // Payment Form State
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<any>(null);
+  const [paymentForm, setPaymentForm] = useState({ name: '', email: '', whatsapp: '', timezone: '' });
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    // Auto-detect Timezone
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    setPaymentForm(prev => ({ ...prev, timezone: tz }));
+  }, []);
 
   // Notification State
   const [notification, setNotification] = useState<{ show: boolean; message: string; type: 'success' | 'error' | 'warning' | 'info' }>({
@@ -67,16 +80,112 @@ const App = () => {
 
   const showNotification = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
     setNotification({ show: true, message, type });
-    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 5000); // Auto hide after 5s
+    setTimeout(() => setNotification(prev => ({ ...prev, show: false })), 5000);
   };
 
+  const handlePurchase = (tier: any) => {
+    if (tier.id !== 'T1') return;
+    setSelectedTier(tier);
+    setIsPaymentModalOpen(true);
+  };
 
+  const onPaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+
+    // Clean phone number
+    let formattedPhone = paymentForm.whatsapp.replace(/\D/g, '');
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = '62' + formattedPhone.slice(1);
+    } else if (!formattedPhone.startsWith('62') && !formattedPhone.startsWith('+')) {
+      // Keep international numbers as-is for EN page
+    }
+
+    try {
+      // 1. Save user data to Supabase subscription table
+      const orderId = uuidv4();
+      const { error: dbError } = await supabase
+        .from('subscription')
+        .insert([{
+          order_id: orderId,
+          name: paymentForm.name,
+          email: paymentForm.email,
+          whatsapp_number: parseInt(formattedPhone) || 0,
+          name_transaction: `Subscription ${selectedTier.id}`,
+          amount: 1299, // $12.99 in cents
+          status: 'pending',
+          payment_type: 'lemonsqueezy',
+          created_at: new Date().toISOString(),
+          currency: 'USD',
+          status_message: 'Waiting for Lemon Squeezy payment',
+          customer_details: {
+            first_name: paymentForm.name,
+            email: paymentForm.email,
+            phone: formattedPhone,
+          },
+        }]);
+
+      if (dbError) {
+        console.error('Supabase Insert Error:', dbError.message);
+      }
+
+      // 2. Open Lemon Squeezy checkout overlay
+      // Pass order_id as custom data so webhook can match the Supabase record
+      const checkoutParams = new URLSearchParams({
+        'embed': '1',
+        'checkout[email]': paymentForm.email,
+        'checkout[name]': paymentForm.name,
+        'checkout[custom][order_id]': orderId,
+        'checkout[custom][email]': paymentForm.email,
+        'checkout[custom][name]': paymentForm.name,
+        'checkout[custom][whatsapp]': formattedPhone,
+      });
+      const checkoutUrl = `https://aceelevate.lemonsqueezy.com/checkout/buy/e1c673f0-b196-41e3-bc13-318ec1344d41?${checkoutParams.toString()}`;
+
+      // @ts-ignore
+      if (typeof window.LemonSqueezy !== 'undefined') {
+        // @ts-ignore
+        window.LemonSqueezy.Url.Open(checkoutUrl);
+      } else {
+        // Fallback: open in new tab
+        window.open(checkoutUrl, '_blank');
+      }
+
+      setIsPaymentModalOpen(false);
+      setIsProcessing(false);
+
+      // Client-side: listen for checkout success to show notification only
+      // Supabase update + n8n forwarding is handled server-side via /api/webhooks/lemonsqueezy
+      // @ts-ignore
+      window.addEventListener('message', function lsHandler(event: MessageEvent) {
+        if (event.origin === 'https://app.lemonsqueezy.com' || event.origin === 'https://aceelevate.lemonsqueezy.com') {
+          if (event.data?.event === 'Checkout.Success') {
+            showNotification('Payment Successful! Thank you.', 'success');
+            window.removeEventListener('message', lsHandler);
+          }
+        }
+      });
+
+    } catch (err) {
+      showNotification('A connection error occurred.', 'error');
+      setIsProcessing(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Initialize Lemon Squeezy overlay after script loads
+  useEffect(() => {
+    // @ts-ignore
+    if (typeof window.createLemonSqueezy === 'function') {
+      // @ts-ignore
+      window.createLemonSqueezy();
+    }
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -331,6 +440,10 @@ const App = () => {
                 <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
               </a>
             ))}
+            <Link href="/blog" className="hover:text-white transition-colors duration-300 relative group py-2">
+              BLOG
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
           </div>
 
           <div className="flex items-center gap-5">
@@ -390,10 +503,10 @@ const App = () => {
 
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-10">
               <button
-                onClick={() => document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById('harga')?.scrollIntoView({ behavior: 'smooth' })}
                 className="w-full sm:w-auto px-12 py-6 bg-white text-black rounded-2xl font-black text-xl hover:bg-pink-500 hover:text-white transition-all shadow-2xl hover:shadow-pink-500/20 active:scale-95 duration-300 italic"
               >
-                Start Shoshin — $12.99
+                Get Trial 14 Days
               </button>
               <div className="flex items-center gap-3">
                 <MousePointer2 size={16} className="text-blue-400" />
@@ -619,26 +732,33 @@ const App = () => {
                   ))}
                 </div>
 
-                <button
-                  onClick={() => {
-                    if (tier.id === 'T0') {
-                      setActiveTier('T0');
-                      setSubmitted(false);
-                      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                  className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
-                >
-                  {tier.id === 'T1'
-                    ? 'ACCESS SHOSHIN'
-                    : tier.id === 'T0'
+                {tier.id === 'T1' ? (
+                  <button
+                    onClick={() => handlePurchase(tier)}
+                    className="w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl"
+                  >
+                    TRIAL 14 DAYS
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (tier.id === 'T0') {
+                        setActiveTier('T0');
+                        setSubmitted(false);
+                        document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
+                      } else {
+                        document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
+                  >
+                    {tier.id === 'T0'
                       ? 'JOIN WAITLIST'
                       : tier.status === 'Waitlist'
                         ? 'JOIN WAITLIST'
                         : `ACCESS ${tier.name}`}
-                </button>
+                  </button>
+                )}
               </motion.div>
             ))}
           </div>
@@ -840,7 +960,97 @@ const App = () => {
         )}
       </AnimatePresence>
 
+      {/* PAYMENT MODAL */}
+      <AnimatePresence>
+        {isPaymentModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-slate-900 border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
+            >
+              <button
+                onClick={() => setIsPaymentModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-500 hover:text-white"
+              >
+                <X size={24} />
+              </button>
+              <h3 className="text-2xl font-bold text-white mb-2">Subscribe {selectedTier?.name}</h3>
+              <p className="text-slate-400 mb-6 text-sm">Complete your details to proceed with your subscription.</p>
 
+              <form onSubmit={onPaymentSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors"
+                    placeholder="Your Name"
+                    value={paymentForm.name}
+                    onChange={(e) => setPaymentForm({ ...paymentForm, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">WhatsApp Number</label>
+                  <input
+                    type="tel"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors"
+                    placeholder="1234567890 (with country code)"
+                    value={paymentForm.whatsapp}
+                    onChange={(e) => setPaymentForm({ ...paymentForm, whatsapp: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email</label>
+                  <input
+                    type="email"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-pink-500 transition-colors"
+                    onChange={(e) => setPaymentForm({ ...paymentForm, email: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Timezone (Auto-detected)</label>
+                  <input
+                    type="text"
+                    readOnly
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white/50 cursor-not-allowed focus:outline-none transition-colors"
+                    value={paymentForm.timezone}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-pink-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                >
+                  {isProcessing ? 'Processing...' : `Pay ${selectedTier?.price}`}
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Lemon Squeezy Checkout Script */}
+      <Script
+        src="https://assets.lemonsqueezy.com/lemon.js"
+        strategy="afterInteractive"
+        onLoad={() => {
+          // @ts-ignore
+          if (typeof window.createLemonSqueezy === 'function') {
+            // @ts-ignore
+            window.createLemonSqueezy();
+          }
+        }}
+      />
     </div>
   );
 };
