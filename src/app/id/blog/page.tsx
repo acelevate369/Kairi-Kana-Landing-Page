@@ -1,9 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getAllPublishedPosts } from '@/lib/blog';
-import { Calendar, ArrowRight, ArrowLeft, BookOpen } from 'lucide-react';
+import { Calendar, ArrowRight, BookOpen } from 'lucide-react';
+import BlogNavbar from '../../blog/components/BlogNavbar';
 
-export const revalidate = 3600; // ISR: revalidate every 1 hour
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
     title: 'Blog - Wawasan & Artikel',
@@ -22,39 +23,13 @@ export default async function BlogPageID() {
 
     return (
         <div className="min-h-screen bg-[#01040D] text-slate-200 font-sans selection:bg-pink-500/30">
-            {/* Background Ambience */}
             <div className="fixed inset-0 overflow-hidden -z-10">
                 <div className="absolute top-[-10%] right-[-5%] w-[800px] h-[800px] bg-purple-600/10 blur-[150px] rounded-full" />
                 <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full" />
             </div>
 
-            {/* Minimal Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6">
-                <div className="flex justify-between items-center w-full max-w-7xl py-4 px-6">
-                    <Link href="/id" className="flex items-center space-x-3 group">
-                        <div className="flex flex-col">
-                            <span className="text-lg font-black tracking-tighter text-white leading-none italic uppercase group-hover:text-pink-400 transition">KAIRI</span>
-                            <span className="text-[9px] font-bold tracking-[0.3em] text-pink-500/80 uppercase">Kana</span>
-                        </div>
-                    </Link>
-                    <div className="flex items-center gap-5">
-                        <div className="flex items-center space-x-2 text-[10px] font-bold">
-                            <Link href="/blog" className="text-slate-500 hover:text-white transition-colors">En</Link>
-                            <span className="text-white/20">|</span>
-                            <span className="text-white cursor-default">Id</span>
-                        </div>
-                        <Link
-                            href="/id"
-                            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
-                        >
-                            <ArrowLeft size={14} />
-                            BERANDA
-                        </Link>
-                    </div>
-                </div>
-            </nav>
+            <BlogNavbar homeHref="/id" />
 
-            {/* Header */}
             <section className="pt-40 pb-16 px-6">
                 <div className="max-w-5xl mx-auto text-center">
                     <div className="inline-flex items-center space-x-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-8">
@@ -70,7 +45,6 @@ export default async function BlogPageID() {
                 </div>
             </section>
 
-            {/* Posts Grid */}
             <section className="pb-32 px-6">
                 <div className="max-w-5xl mx-auto">
                     {posts.length === 0 ? (
@@ -117,7 +91,6 @@ export default async function BlogPageID() {
                 </div>
             </section>
 
-            {/* Footer */}
             <footer className="py-12 px-6 border-t border-white/5 text-center">
                 <p className="text-[9px] font-bold text-slate-800 uppercase tracking-widest italic">© 2026 Ace Elevate Global.</p>
             </footer>
