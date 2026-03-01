@@ -74,7 +74,7 @@ export default async function BlogPostPageID({ params }: { params: Promise<{ slu
                 <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-blue-600/10 blur-[150px] rounded-full" />
             </div>
 
-            <BlogNavbar homeHref="/id" />
+            <BlogNavbar homeHref="/id" isPost />
 
             <article className="pt-40 pb-32 px-6">
                 <div className="max-w-3xl mx-auto">
@@ -119,7 +119,7 @@ export default async function BlogPostPageID({ params }: { params: Promise<{ slu
                         prose-blockquote:border-pink-500/50 prose-blockquote:text-slate-400 prose-blockquote:italic
                         prose-code:text-pink-400 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-sm
                         prose-pre:bg-[#0F172A] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl
-                        prose-img:rounded-2xl prose-img:border prose-img:border-white/10
+                        prose-img:rounded-2xl prose-img:border prose-img:border-white/10 prose-img:max-w-full
                         prose-hr:border-white/10
                     ">
                         <ReactMarkdown
@@ -133,14 +133,16 @@ export default async function BlogPostPageID({ params }: { params: Promise<{ slu
                                             src={encodedSrc}
                                             alt={alt || ''}
                                             loading="lazy"
-                                            className="rounded-2xl border border-white/10 w-full"
+                                            className="rounded-2xl border border-white/10 w-full max-w-full"
                                             {...props}
                                         />
                                     );
                                 }
                             }}
                         >
-                            {post.content}
+                            {post.content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match: string, imgAlt: string, url: string) => {
+                                return `![${imgAlt}](${encodeURI(decodeURI(url.trim()))})`;
+                            })}
                         </ReactMarkdown>
                     </div>
 

@@ -484,8 +484,14 @@ const App = () => {
                             <span className="text-white">Id</span>
                         </div>
 
-                        {/* Mobile Language Switcher */}
-                        <div className="md:hidden flex items-center space-x-2">
+                        {/* Mobile Language Switcher + Blog */}
+                        <div className="md:hidden flex items-center space-x-3">
+                            {!scrolled && (
+                                <>
+                                    <Link href="/id/blog" className="text-slate-400 hover:text-pink-500 transition-colors text-[10px] font-black uppercase tracking-widest">Blog</Link>
+                                    <span className="text-white/10">|</span>
+                                </>
+                            )}
                             <Link href="/" className="hover:text-white transition-colors text-xs">En</Link>
                             <span className="text-white/20">|</span>
                             <span className="text-pink-500 font-bold text-xs">Id</span>
@@ -928,7 +934,8 @@ const App = () => {
                     </div>
                     <span className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] italic leading-none">Ace Elevate Innovation Lab</span>
                 </div>
-                <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">
+                <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] flex-wrap justify-center">
+                    <Link href="/id/blog" className="hover:text-pink-500 transition-colors duration-300">Blog</Link>
                     <a href="/id/privacy" className="hover:text-pink-500 transition-colors duration-300">Privasi</a>
                     <a href="/id/terms" className="hover:text-purple-500 transition-colors duration-300">Syarat</a>
                     <a href="/id/refund" className="hover:text-blue-500 transition-colors duration-300">Kebijakan Pengembalian Dana</a>

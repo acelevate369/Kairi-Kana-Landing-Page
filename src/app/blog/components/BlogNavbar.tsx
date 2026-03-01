@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BookOpen } from 'lucide-react';
 import KairiLogoImg from '../../Logo_Kairi_Kana.png';
 
 const KairiLogo = () => (
@@ -21,8 +21,14 @@ const KairiLogo = () => (
     </motion.div>
 );
 
-export default function BlogNavbar({ homeHref = "/" }: { homeHref?: string }) {
+interface BlogNavbarProps {
+    homeHref?: string;
+    isPost?: boolean; // true when inside a blog post
+}
+
+export default function BlogNavbar({ homeHref = "/", isPost = false }: BlogNavbarProps) {
     const [scrolled, setScrolled] = useState(false);
+    const blogHref = homeHref === '/id' ? '/id/blog' : '/blog';
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -57,20 +63,43 @@ export default function BlogNavbar({ homeHref = "/" }: { homeHref?: string }) {
                         HOME
                         <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
                     </Link>
-                    <span className="text-pink-500 cursor-default py-2">
-                        BLOG
-                    </span>
+                    {isPost ? (
+                        <Link href={blogHref} className="hover:text-white transition-colors duration-300 relative group py-2">
+                            BLOG
+                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
+                        </Link>
+                    ) : (
+                        <span className="text-pink-500 cursor-default py-2">
+                            BLOG
+                        </span>
+                    )}
                 </div>
 
-                {/* Mobile Back Button */}
-                <div className="md:hidden flex items-center">
-                    <Link
-                        href={homeHref}
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
-                    >
-                        <ArrowLeft size={14} />
-                        HOME
-                    </Link>
+                {/* Mobile Nav */}
+                <div className="md:hidden flex items-center gap-4">
+                    {isPost ? (
+                        <Link
+                            href={blogHref}
+                            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
+                        >
+                            <ArrowLeft size={14} />
+                            BLOG
+                        </Link>
+                    ) : (
+                        <>
+                            <Link
+                                href={homeHref}
+                                className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
+                            >
+                                <ArrowLeft size={14} />
+                                HOME
+                            </Link>
+                            <span className="text-pink-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                <BookOpen size={12} />
+                                BLOG
+                            </span>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>

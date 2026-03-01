@@ -454,8 +454,14 @@ const App = () => {
               <Link href="/id" className="text-slate-500 hover:text-white transition-colors">Id</Link>
             </div>
 
-            {/* Mobile Language Switcher */}
-            <div className="md:hidden flex items-center space-x-2">
+            {/* Mobile Language Switcher + Blog */}
+            <div className="md:hidden flex items-center space-x-3">
+              {!scrolled && (
+                <>
+                  <Link href="/blog" className="text-slate-400 hover:text-pink-500 transition-colors text-[10px] font-black uppercase tracking-widest">Blog</Link>
+                  <span className="text-white/10">|</span>
+                </>
+              )}
               <span className="text-pink-500 font-bold text-xs cursor-default">En</span>
               <span className="text-white/20">|</span>
               <Link href="/id" className="text-slate-400 hover:text-white transition-colors text-xs">Id</Link>
@@ -903,7 +909,8 @@ const App = () => {
           </div>
           <span className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] italic leading-none">Ace Elevate Innovation Lab</span>
         </div>
-        <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">
+        <div className="flex gap-12 text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] flex-wrap justify-center">
+          <Link href="/blog" className="hover:text-pink-500 transition-colors duration-300">Blog</Link>
           <a href="/privacy" className="hover:text-pink-500 transition-colors duration-300">Privacy Policy</a>
           <a href="/terms" className="hover:text-purple-500 transition-colors duration-300">Terms & Conditions</a>
           <a href="/refund" className="hover:text-blue-500 transition-colors duration-300">Refund Policy</a>
