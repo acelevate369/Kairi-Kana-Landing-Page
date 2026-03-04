@@ -665,27 +665,116 @@ const App = () => {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-400 animate-gradient-text">Core</span>
               </h2>
               <p className="text-lg text-slate-400 leading-relaxed mb-10">
-                Kairi Kana isn&#39;t just a chatbot. She is an Agentic AI powered by 16 specialized core agents. From financial auditing to schedule mapping, each agent works in harmony to maintain your personal context without hallucinations.
+                Kairi Kana isn&#39;t just a chatbot. She is an Agentic AI powered by <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 font-black">16 specialized core agents</span>. From financial auditing to schedule mapping, each agent works in harmony to maintain your personal context without hallucinations.
               </p>
               <div className="flex gap-10">
                 <div><p className="text-3xl font-black text-white italic">99.8%</p><p className="text-[9px] font-bold text-slate-600 uppercase">ACCURACY</p></div>
                 <div><p className="text-3xl font-black text-white italic">&lt; 1.5s</p><p className="text-[9px] font-bold text-slate-600 uppercase">LATENCY</p></div>
               </div>
             </div>
-            <div className="lg:w-1/2 space-y-6">
-              {[
-                { title: "ZERO HALLUCINATION", desc: "Dual-model verification ensures records are always based on facts.", color: "pink" },
-                { title: "SMART LOGIC", desc: "Human-like context retention that understands messy inputs and voice notes.", color: "blue" }
-              ].map((box, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ scale: 1.02, x: 10 }}
-                  className="p-8 bg-white/5 rounded-3xl border border-white/10 shadow-lg"
-                >
-                  <p className={`text-[10px] font-black uppercase tracking-widest text-${box.color}-500 mb-2 italic`}>{box.title}</p>
-                  <p className="text-slate-400 text-sm italic font-medium">{box.desc}</p>
-                </motion.div>
-              ))}
+            <div className="lg:w-1/2 flex items-center justify-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="w-[340px] h-[340px] md:w-[400px] md:h-[400px]"
+              >
+                {(() => {
+                  const cores: [number, number, string][] = [
+                    [148, 50, 'FIN'], [252, 46, 'SCH'],
+                    [60, 118, 'HST'], [340, 108, 'NLP'],
+                    [130, 135, 'AUD'], [270, 128, 'PLN'],
+                    [38, 200, 'MEM'], [362, 192, 'VIS'],
+                    [110, 218, 'RES'], [290, 212, 'GAM'],
+                    [55, 290, 'QRY'], [345, 298, 'LOG'],
+                    [130, 270, 'CTX'], [270, 275, 'SYN'],
+                    [148, 352, 'RPT'], [252, 358, 'TRK'],
+                  ];
+                  const mesh: [number, number][] = [
+                    [0, 1], [0, 2], [1, 3], [0, 4], [1, 5],
+                    [2, 6], [3, 7], [2, 4], [3, 5],
+                    [4, 5], [4, 8], [5, 9],
+                    [6, 8], [7, 9], [6, 10], [7, 11],
+                    [8, 12], [9, 13],
+                    [10, 12], [11, 13], [10, 14], [11, 15],
+                    [12, 13], [12, 14], [13, 15],
+                    [14, 15],
+                  ];
+                  const s = 13;
+                  const pinOffsets = [-5, -1, 3];
+                  const kPinOffsets = [-14, -7, 0, 7, 14];
+                  return (
+                    <svg viewBox="0 0 400 400" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                      <style>{`
+                        .pcb-trace{stroke-dasharray:5 4;animation:trFlow 2.5s linear infinite}
+                        .pcb-mesh{opacity:.18}
+                        .k-center{animation:kPulse 3s ease-in-out infinite}
+                        @keyframes trFlow{to{stroke-dashoffset:-18}}
+                        @keyframes kPulse{0%,100%{filter:drop-shadow(0 0 6px rgba(168,85,247,.12))}50%{filter:drop-shadow(0 0 22px rgba(168,85,247,.45))}}
+                      `}</style>
+                      <defs>
+                        <linearGradient id="tg" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#ec4899" stopOpacity=".45" />
+                          <stop offset="100%" stopColor="#8b5cf6" stopOpacity=".18" />
+                        </linearGradient>
+                        <linearGradient id="mg" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#3b82f6" stopOpacity=".22" />
+                          <stop offset="100%" stopColor="#a855f7" stopOpacity=".08" />
+                        </linearGradient>
+                        <linearGradient id="kBg" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#0c1222" />
+                          <stop offset="50%" stopColor="#111827" />
+                          <stop offset="100%" stopColor="#0c1222" />
+                        </linearGradient>
+                        <linearGradient id="kTx" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#ec4899" />
+                          <stop offset="50%" stopColor="#a855f7" />
+                          <stop offset="100%" stopColor="#3b82f6" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Hub traces: each core → center K */}
+                      {cores.map(([x, y], i) => (
+                        <line key={`h${i}`} x1={200} y1={200} x2={x} y2={y} stroke="url(#tg)" strokeWidth="0.8" className="pcb-trace" style={{ animationDelay: `${i * .15}s` }} />
+                      ))}
+
+                      {/* Mesh traces: core ↔ core */}
+                      {mesh.map(([a, b], i) => (
+                        <line key={`m${i}`} x1={cores[a][0]} y1={cores[a][1]} x2={cores[b][0]} y2={cores[b][1]} stroke="url(#mg)" strokeWidth="0.6" className="pcb-mesh" />
+                      ))}
+
+                      {/* 16 sub-core chips */}
+                      {cores.map(([cx, cy, label], i) => (
+                        <g key={`c${i}`}>
+                          {pinOffsets.map(d => <rect key={`t${d}`} x={cx + d} y={cy - s - 3} width={2} height={3} rx={.5} fill="#475569" fillOpacity={.45} />)}
+                          {pinOffsets.map(d => <rect key={`b${d}`} x={cx + d} y={cy + s} width={2} height={3} rx={.5} fill="#475569" fillOpacity={.45} />)}
+                          {pinOffsets.map(d => <rect key={`l${d}`} x={cx - s - 3} y={cy + d} width={3} height={2} rx={.5} fill="#475569" fillOpacity={.45} />)}
+                          {pinOffsets.map(d => <rect key={`r${d}`} x={cx + s} y={cy + d} width={3} height={2} rx={.5} fill="#475569" fillOpacity={.45} />)}
+                          <rect x={cx - s} y={cy - s} width={s * 2} height={s * 2} rx={3} fill="#0c1222" stroke="#334155" strokeWidth={.8} />
+                          <circle cx={cx - s + 4} cy={cy - s + 4} r={1.5} fill="#475569" fillOpacity={.35} />
+                          <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fill="#94a3b8" fontSize="7" fontWeight="900" letterSpacing="1" fontFamily="system-ui,sans-serif">{label}</text>
+                        </g>
+                      ))}
+
+                      {/* Central K Engine chip */}
+                      <g className="k-center">
+                        {kPinOffsets.map(d => <rect key={`kt${d}`} x={200 + d - 1.5} y={175} width={3} height={5} rx={.5} fill="#64748b" fillOpacity={.55} />)}
+                        {kPinOffsets.map(d => <rect key={`kb${d}`} x={200 + d - 1.5} y={220} width={3} height={5} rx={.5} fill="#64748b" fillOpacity={.55} />)}
+                        {kPinOffsets.map(d => <rect key={`kl${d}`} x={175} y={200 + d - 1.5} width={5} height={3} rx={.5} fill="#64748b" fillOpacity={.55} />)}
+                        {kPinOffsets.map(d => <rect key={`kr${d}`} x={220} y={200 + d - 1.5} width={5} height={3} rx={.5} fill="#64748b" fillOpacity={.55} />)}
+                        <rect x={180} y={180} width={40} height={40} rx={5} fill="url(#kBg)" stroke="#64748b" strokeWidth={1.2} />
+                        <path d="M184 180 L180 184" stroke="#a855f7" strokeWidth={1.2} strokeOpacity={.45} />
+                        <line x1={208} y1={186} x2={216} y2={186} stroke="#334155" strokeWidth={.5} strokeOpacity={.25} />
+                        <line x1={184} y1={210} x2={192} y2={210} stroke="#334155" strokeWidth={.5} strokeOpacity={.25} />
+                        <rect x={212} y={208} width={6} height={6} rx={1} stroke="#334155" strokeWidth={.4} fill="none" strokeOpacity={.2} />
+                        <text x={200} y={198} textAnchor="middle" dominantBaseline="middle" fill="url(#kTx)" fontSize="22" fontWeight="900" fontStyle="italic" fontFamily="system-ui,sans-serif">K</text>
+                        <text x={200} y={212} textAnchor="middle" dominantBaseline="middle" fill="#475569" fontSize="5.5" fontWeight="900" letterSpacing="1.5" fontFamily="system-ui,sans-serif">ENGINE</text>
+                      </g>
+                    </svg>
+                  );
+                })()}
+              </motion.div>
             </div>
           </div>
         </motion.div>
