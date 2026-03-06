@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: "Kairi Kana - Agentic AI Personal Assistant | Kill the Chaos",
     template: "%s | Kairi Kana",
   },
-  description: "Your context-aware Agentic AI assistant living in WhatsApp. Powered by 16 core AI agents to organize your life, track habits, and log expenses with zero friction.",
+  description: "Kill the chaos. Kairi Kana is your Agentic AI personal assistant on WhatsApp — powered by 16 core AI agents to organize tasks, track habits, log expenses, and manage your life with zero app fatigue.",
   keywords: [
     // Brand keywords
     "Kairi Kana",
