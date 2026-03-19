@@ -330,6 +330,7 @@ const App = () => {
             id: 'T0',
             name: 'The Creator',
             price: 'Bespoke',
+            startFrom: 'mulai dari Rp 5.000/bln',
             status: 'Live',
             color: 'from-slate-500/20',
             sellingPoint: 'God Mode. Kedaulatan & integrasi total.',
@@ -338,6 +339,8 @@ const App = () => {
                 'White-Labeling: Ganti nama Kairi jadi apapun. Ini AI MILIKMU sepenuhnya.',
                 'Koneksi Dunia Nyata & Kapabilitas Aksi',
                 'Fine-tuning pada basis pengetahuan pribadimu',
+                'Skill AI Kustom sesuai kebutuhan unikmu',
+                'Troubleshooting Gratis & dukungan penuh',
                 'Akses Prioritas 24/7 ke Lab Ace Elevate'
             ],
             special: true
@@ -835,6 +838,9 @@ const App = () => {
                                         <span className="text-5xl font-black text-white">{tier.price}</span>
                                         {tier.price.includes('Rp') && <span className="text-slate-600 font-bold text-xs tracking-widest uppercase">/bln</span>}
                                     </div>
+                                    {'startFrom' in tier && tier.startFrom && (
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2 italic">{tier.startFrom}</p>
+                                    )}
                                     <p className="text-[10px] text-pink-400 font-black uppercase tracking-widest mt-4 mb-2 italic">{tier.sellingPoint}</p>
                                 </div>
 
@@ -849,28 +855,37 @@ const App = () => {
                                     ))}
                                 </div>
 
-                                <button
-                                    onClick={() => {
-                                        if (tier.id === 'T1') {
-                                            handlePurchase(tier);
-                                        } else if (tier.id === 'T0') {
-                                            setActiveTier('T0');
-                                            setSubmitted(false);
-                                            document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
-                                        } else if (tier.status !== 'Waitlist') {
-                                            document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
-                                        }
-                                    }}
-                                    className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
-                                >
-                                    {tier.id === 'T1'
-                                        ? 'Beli Sekarang'
-                                        : tier.id === 'T0'
-                                            ? 'Minta Akses'
-                                            : tier.status === 'Waitlist'
-                                                ? 'Gabung Waitlist'
-                                                : `Akses ${tier.name}`}
-                                </button>
+                                {tier.id === 'T1' ? (
+                                    <button
+                                        onClick={() => handlePurchase(tier)}
+                                        className="w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl"
+                                    >
+                                        Beli Sekarang
+                                    </button>
+                                ) : tier.id === 'T0' ? (
+                                    <a
+                                        href="https://wa.me/6285753442122?text=Halo%20Ace%20Elevate%2C%20saya%20tertarik%20dengan%20paket%20T0%20Creator%20Kairi%20Kana.%20Saya%20ingin%20tahu%20lebih%20lanjut%20tentang%20paket%20bespoke%20dan%20bagaimana%20bisa%20disesuaikan%20dengan%20kebutuhan%20saya."
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        title="Hubungi kami tentang tier Creator via WhatsApp"
+                                        className="block w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl text-center"
+                                    >
+                                        HUBUNGI KAMI
+                                    </a>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            if (tier.status !== 'Waitlist') {
+                                                document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
+                                            }
+                                        }}
+                                        className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
+                                    >
+                                        {tier.status === 'Waitlist'
+                                            ? 'Gabung Waitlist'
+                                            : `Akses ${tier.name}`}
+                                    </button>
+                                )}
                             </motion.div>
                         ))}
                     </div>
@@ -940,7 +955,7 @@ const App = () => {
                         Live in <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-600 to-blue-500">Flow.</span>
                     </h2>
-                    <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Amankan slot tier Shoshin-mu seharga Rp 49.000/bulan. Undangan akses awal dikirim setiap hari.</p>
+                    <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Jadilah yang terdepan. Subscribe untuk update eksklusif, akses awal, dan info terbaru dari Kairi Kana.</p>
 
                     <AnimatePresence mode='wait'>
                         {!submitted ? (

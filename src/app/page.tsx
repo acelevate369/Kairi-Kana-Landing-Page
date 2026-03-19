@@ -300,6 +300,7 @@ const App = () => {
       id: 'T0',
       name: 'The Creator',
       price: 'Bespoke',
+      startFrom: 'starts from $2/mo',
       status: 'Live',
       color: 'from-slate-500/20',
       sellingPoint: 'God Mode. Total sovereignty and integration.',
@@ -308,6 +309,8 @@ const App = () => {
         'White-Labeling: Rename Kairi to anything. It becomes YOUR AI.',
         'Real-World Action Capabilities',
         'Fine-tuning on your specific private knowledge base',
+        'Custom AI Skills tailored to your unique workflow',
+        'Free Troubleshooting & dedicated support',
         '24/7 Priority Access to Ace Elevate Labs'
       ],
       special: true
@@ -813,6 +816,9 @@ const App = () => {
                     <span className="text-5xl font-black text-white">{tier.price}</span>
                     {tier.price.includes('$') && <span className="text-slate-600 font-bold text-xs tracking-widest uppercase">/MO</span>}
                   </div>
+                  {'startFrom' in tier && tier.startFrom && (
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2 italic">{tier.startFrom}</p>
+                  )}
                   <p className="text-[10px] text-pink-400 font-black uppercase tracking-widest mt-4 mb-2 italic">{tier.sellingPoint}</p>
                 </div>
 
@@ -834,24 +840,26 @@ const App = () => {
                   >
                     TRIAL 14 DAYS
                   </button>
+                ) : tier.id === 'T0' ? (
+                  <a
+                    href="https://wa.me/6285753442122?text=Hi%20Ace%20Elevate%2C%20I%E2%80%99m%20interested%20in%20the%20T0%20Creator%20tier%20for%20Kairi%20Kana.%20I%E2%80%99d%20love%20to%20learn%20more%20about%20the%20bespoke%20plan%20and%20discuss%20how%20it%20can%20be%20tailored%20to%20my%20needs."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Contact us about The Creator tier via WhatsApp"
+                    className="block w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl text-center"
+                  >
+                    CONTACT US
+                  </a>
                 ) : (
                   <button
                     onClick={() => {
-                      if (tier.id === 'T0') {
-                        setActiveTier('T0');
-                        setSubmitted(false);
-                        document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
-                      } else {
-                        document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
-                      }
+                      document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' });
                     }}
                     className={`w-full py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all relative z-10 ${tier.status === 'Waitlist' ? 'bg-white/5 text-slate-700 border border-white/5 cursor-not-allowed' : 'bg-white text-black hover:bg-pink-500 hover:text-white shadow-xl'}`}
                   >
-                    {tier.id === 'T0'
+                    {tier.status === 'Waitlist'
                       ? 'JOIN WAITLIST'
-                      : tier.status === 'Waitlist'
-                        ? 'JOIN WAITLIST'
-                        : `ACCESS ${tier.name}`}
+                      : `ACCESS ${tier.name}`}
                   </button>
                 )}
               </motion.div>
@@ -923,7 +931,7 @@ const App = () => {
             Live in <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-600 to-blue-500">Flow.</span>
           </h2>
-          <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Secure your Shoshin tier slot for $12.99/mo. Early access invites sent daily.</p>
+          <p className="text-xl text-slate-400 mb-16 max-w-xl mx-auto italic font-medium tracking-tight">Stay ahead of the curve. Subscribe for exclusive updates, early access perks, and insider drops.</p>
 
           <AnimatePresence mode='wait'>
             {!submitted ? (
